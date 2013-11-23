@@ -14,6 +14,8 @@
  */
 package me.sudofu.sanitycheck
 
+import me.sudofu.sanitycheck.SanityCheckException
+
 /**
  * A utility for performing a wide variety of basic sanity checks on
  * input, data, parameters, arguments, etc.
@@ -21,7 +23,7 @@ package me.sudofu.sanitycheck
  * <p>
  * The <b>SanityChecker</b> provides a variety of basic sanity checks.
  * For each check performed, if any should fail an
- * {@link java.lang.IllegalArgumentException IllegalArgumentException}
+ * {@link java.lang.SanityCheckException SanityCheckException}
  * will be thrown, giving a uniform error message.
  * </p>
  *
@@ -173,7 +175,7 @@ class SanityChecker {
         this.allowPassOnNull = allowPassOnNull
     }
 
-    public static SanityChecker checkFor(String name, Object entity, Closure closure) throws IllegalArgumentException {
+    public static SanityChecker checkFor(String name, Object entity, Closure closure) throws SanityCheckException {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this.newInstance(name, entity)
@@ -184,7 +186,7 @@ class SanityChecker {
         return runClosure.delegate
     }
 
-    public static SanityChecker checkFor(String name, Object entity, String classification, Closure closure) throws IllegalArgumentException {
+    public static SanityChecker checkFor(String name, Object entity, String classification, Closure closure) throws SanityCheckException {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this.newInstance(name, entity, classification)
@@ -195,7 +197,7 @@ class SanityChecker {
         return runClosure.delegate
     }
 
-    public static SanityChecker checkFor(String name, Object entity, boolean allowPassOnNull, Closure closure) throws IllegalArgumentException {
+    public static SanityChecker checkFor(String name, Object entity, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this.newInstance(name, entity, allowPassOnNull)
@@ -206,7 +208,7 @@ class SanityChecker {
         return runClosure.delegate
     }
 
-    public static SanityChecker checkFor(String name, Object entity, String classification, boolean allowPassOnNull, Closure closure) throws IllegalArgumentException {
+    public static SanityChecker checkFor(String name, Object entity, String classification, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this.newInstance(name, entity, classification, allowPassOnNull)
@@ -217,17 +219,17 @@ class SanityChecker {
         return runClosure.delegate
     }
 
-    public void isNotNull() throws IllegalArgumentException {
+    public void isNotNull() throws SanityCheckException {
         if (entity == null) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is null.")
+            throw new SanityCheckException(name, entity, classification, "Cannot be null")
         }
     }
 
-    public void isNotEmpty() throws IllegalArgumentException {
+    public void isNotEmpty() throws SanityCheckException {
         isNotEmpty(allowPassOnNull)
     }
 
-    public void isNotEmpty(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isNotEmpty(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -236,19 +238,19 @@ class SanityChecker {
 
         if (entity.getMetaClass().respondsTo(entity, 'isEmpty')) {
             if (entity.isEmpty()) {
-                throw new IllegalArgumentException("${classification.capitalize()} ${name} is empty.")
+            throw new SanityCheckException(name, entity, classification, "Cannot be empty")
             }
         }
         else {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} does not have an isEmpty() method.")
+            throw new SanityCheckException(name, entity, classification, "Does not respond to isEmpty() method (cannot be empty)")
         }
     }
 
-    public void isBoolean() throws IllegalArgumentException {
+    public void isBoolean() throws SanityCheckException {
         isBoolean(allowPassOnNull)
     }
 
-    public void isBoolean(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isBoolean(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -256,15 +258,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != Boolean) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Boolean.")
+            throw new SanityCheckException(name, entity, classification, "Must be a Boolean")
         }
     }
 
-    public void isString() throws IllegalArgumentException {
+    public void isString() throws SanityCheckException {
         isString(allowPassOnNull)
     }
 
-    public void isString(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isString(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -272,15 +274,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != String) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a String.")
+            throw new SanityCheckException(name, entity, classification, "Must be a String")
         }
     }
 
-    public void isNumber() throws IllegalArgumentException {
+    public void isNumber() throws SanityCheckException {
         isNumber(allowPassOnNull)
     }
 
-    public void isNumber(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isNumber(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -288,15 +290,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity in Number == false) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Number (or Subclass thereof).")
+            throw new SanityCheckException(name, entity, classification, "Must be a Number (or subclass thereof)")
         }
     }
 
-    public void isInteger() throws IllegalArgumentException {
+    public void isInteger() throws SanityCheckException {
         isInteger(allowPassOnNull)
     }
 
-    public void isInteger(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isInteger(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -304,15 +306,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != Integer) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an Integer.")
+            throw new SanityCheckException(name, entity, classification, "Must be an Integer")
         }
     }
 
-    public void isLong() throws IllegalArgumentException {
+    public void isLong() throws SanityCheckException {
         isLong(allowPassOnNull)
     }
 
-    public void isLong(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isLong(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -320,15 +322,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != Long) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Long.")
+            throw new SanityCheckException(name, entity, classification, "Must be a Long")
         }
     }
 
-    public void isBigDecimal() throws IllegalArgumentException {
+    public void isBigDecimal() throws SanityCheckException {
         isBigDecimal(allowPassOnNull)
     }
 
-    public void isBigDecimal(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isBigDecimal(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -336,15 +338,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != BigDecimal) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a BigDecimal.")
+            throw new SanityCheckException(name, entity, classification, "Must be a BigDecimal")
         }
     }
 
-    public void isDouble() throws IllegalArgumentException {
+    public void isDouble() throws SanityCheckException {
         isDouble(allowPassOnNull)
     }
 
-    public void isDouble(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isDouble(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -352,15 +354,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity.getClass() != Double) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Double.")
+            throw new SanityCheckException(name, entity, classification, "Must be a Double")
         }
     }
 
-    public void isList() throws IllegalArgumentException {
+    public void isList() throws SanityCheckException {
         isList(allowPassOnNull)
     }
 
-    public void isList(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isList(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -368,15 +370,15 @@ class SanityChecker {
         isNotNull()
 
         if (entity in List == false) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an implementation of List.")
+            throw new SanityCheckException(name, entity, classification, "Must be an implementation of List")
         }
     }
 
-    public void isMap() throws IllegalArgumentException {
+    public void isMap() throws SanityCheckException {
         isMap(allowPassOnNull)
     }
 
-    public void isMap(boolean allowPassOnNull) throws IllegalArgumentException {
+    public void isMap(boolean allowPassOnNull) throws SanityCheckException {
         if (allowPassOnNull && entity == null) {
             return
         }
@@ -384,7 +386,7 @@ class SanityChecker {
         isNotNull()
 
         if (entity in Map == false) {
-            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an implementation of Map.")
+            throw new SanityCheckException(name, entity, classification, "Must be an implementation of Map")
         }
     }
 }
