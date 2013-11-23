@@ -1,0 +1,10 @@
+*.iws
+.settings
+/*.zip
+/plugin.xml
+*.log
+/cobertura.ser
+.DS_Store
+/target
+/out
+/web-app
