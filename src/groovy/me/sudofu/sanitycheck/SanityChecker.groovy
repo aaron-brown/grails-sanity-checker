@@ -14,16 +14,84 @@
  */
 package me.sudofu.sanitycheck
 
+/**
+ * A utility for performing a wide variety of basic sanity checks on
+ * input, data, parameters, arguments, etc.
+ *
+ * <p>
+ * The <b>SanityChecker</b> provides a variety of basic sanity checks.
+ * For each check performed, if any should fail an
+ * {@link java.lang.IllegalArgumentException IllegalArgumentException}
+ * will be thrown, giving a uniform error message.
+ * </p>
+ *
+ * <p>
+ * While the use-cases for the <b>SanityChecker</b> itself may be
+ * somewhat limited, it gives a good platform for easy expansion and
+ * incorperation into more complex derivates of itself.
+ * </p>
+ *
+ * @author Aaron Brown
+ */
 class SanityChecker {
 
+    /**
+     * The name of the entity (for error context).
+     *
+     * <p>For example, the name of a method parameter.</p>
+     */
     public final String name
 
+    /**
+     * The entity to perform checks on.
+     *
+     * <p>The value of the entity (intended to be unmondified).</p>
+     */
     public final Object entity
 
+    /**
+     * The classification of the entity (for error context).
+     *
+     * <p>By default, the <code>classification</code> is <b>parameter</b>.</p>
+     *
+     * <p>
+     * Other examples:
+     * <ul>
+     * <li>field</li>
+     * <li>variable</li>
+     * <li>input</li>
+     * <li>argument</li>
+     * </ul>
+     * </p>
+     */
     public final String classification
 
+    /**
+     * Allows the sanity check to allow <code>null</code> entities to
+     * pass the check.
+     *
+     * <p>
+     * By default, the behavior of <b>SanityChecker</b> is to fail any
+     * check if the <b><code>entity</code></b> is <code>null</code>.
+     * </p>
+     *
+     * <p>This behavior can be overridden at the level of any sanity check.</p>
+     */
     public final boolean allowPassOnNull
 
+    /**
+     * Constructs a basic <b>SanityChecker</b> with <i>parameter</i> as
+     * the <b><code>classification</code></b> and which disallows
+     * <code>null</code> to pass sanity checks.
+     *
+     * @param   name
+     *
+     * A human-understandable label for the <code>entity</code>.
+     *
+     * @param   entity
+     *
+     * The entity to perform the sanity check(s) on.
+     */
     public SanityChecker(String name, Object entity) {
         this.name = name
         this.entity = entity
@@ -31,6 +99,22 @@ class SanityChecker {
         this.allowPassOnNull = false
     }
 
+    /**
+     * Constructs a basic <b>SanityChecker</b> which disallows
+     * <code>null</code> to pass sanity checks.
+     *
+     * @param   name
+     *
+     * A human-understandable label for the <code>entity</code>.
+     *
+     * @param   entity
+     *
+     * The entity to perform the sanity check(s) on.
+     *
+     * @param   classification
+     *
+     * A human-understandable classification for the <code>entity</code>.
+     */
     public SanityChecker(String name, Object entity, String classification) {
         this.name = name
         this.entity = entity
@@ -38,6 +122,23 @@ class SanityChecker {
         this.allowPassOnNull = false
     }
 
+    /**
+     * Constructs a basic <b>SanityChecker</b> with <i>parameter</i> as
+     * the <b><code>classification</code></b>.
+     *
+     * @param   name
+     *
+     * A human-understandable label for the <code>entity</code>.
+     *
+     * @param   entity
+     *
+     * The entity to perform the sanity check(s) on.
+     *
+     * @param   allowPassOnNull
+     *
+     * Specifies whether to allow or disallow <code>null</code> entities
+     * to pass sanity checks.
+     */
     public SanityChecker(String name, Object entity, boolean allowPassOnNull) {
         this.name = name
         this.entity = entity
@@ -45,6 +146,26 @@ class SanityChecker {
         this.allowPassOnNull = allowPassOnNull
     }
 
+    /**
+     * Constructs a basic <b>SanityChecker</b>.
+     *
+     * @param   name
+     *
+     * A human-understandable label for the <code>entity</code>.
+     *
+     * @param   entity
+     *
+     * The entity to perform the sanity check(s) on.
+     *
+     * @param   classification
+     *
+     * A human-understandable classification for the <code>entity</code>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Specifies whether to allow or disallow <code>null</code> entities
+     * to pass sanity checks.
+     */
     public SanityChecker(String name, Object entity, String classification, boolean allowPassOnNull) {
         this.name = name
         this.entity = entity
