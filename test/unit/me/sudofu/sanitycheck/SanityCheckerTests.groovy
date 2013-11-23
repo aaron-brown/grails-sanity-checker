@@ -42,6 +42,7 @@ class SanityCheckerTests {
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
         assertEquals("parameter", checker.classification)
+        assertFalse(checker.allowPassOnNull)
     }
 
     void testConstructor02() {
@@ -50,16 +51,39 @@ class SanityCheckerTests {
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
+        assertFalse(checker.allowPassOnNull)
+    }
+
+    void testConstructor03() {
+        SanityChecker checker = new SanityChecker("foo", "bar", true)
+
+        assertEquals("foo", checker.name)
+        assertEquals("bar", checker.entity)
+        assertEquals("parameter", checker.classification)
+        assertTrue(checker.allowPassOnNull)
+    }
+
+    void testConstructor04() {
+        SanityChecker checker = new SanityChecker("foo", "bar", "baz", true)
+
+        assertEquals("foo", checker.name)
+        assertEquals("bar", checker.entity)
+        assertEquals("baz", checker.classification)
+        assertTrue(checker.allowPassOnNull)
     }
 
     void testIsNotNull() {
 
-        new SanityChecker("foo", "hell").isNotNull()
+        new SanityChecker("foo", "hello").isNotNull()
 
         String failure
 
         failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", null).isNotNull()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null, true).isNotNull()
         }
 
         String string
@@ -75,8 +99,13 @@ class SanityCheckerTests {
         failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", 12345).isNotEmpty()
         }
+    }
 
-        failure = shouldFail(IllegalArgumentException) {
+    void testIsNotEmptyNullPreconditionCases() {
+        new SanityChecker("foo", null, true).isNotEmpty()
+        new SanityChecker("foo", null).isNotEmpty(true)
+
+        String failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", null).isNotEmpty()
         }
     }
@@ -124,6 +153,17 @@ class SanityCheckerTests {
         }
     }
 
+    void testIsStringNullPreconditionCases() {
+        new SanityChecker("foo", null, true).isString()
+        new SanityChecker("foo", null).isString(true)
+
+        new SanityChecker("foo", "${null}", true).isString()
+        new SanityChecker("foo", "${null}").isString(true)
+
+        new SanityChecker("foo", "${}", true).isString()
+        new SanityChecker("foo", "${}").isString(true)
+    }
+
     void testIsString() {
 
         new SanityChecker("foo", '').isString()
@@ -131,18 +171,29 @@ class SanityCheckerTests {
         new SanityChecker("foo", '''''').isString()
         new SanityChecker("foo", """""").isString()
         new SanityChecker("foo", 1 as String).isString()
-        new SanityChecker("foo", (null as String)).isString()
-        new SanityChecker("foo", "${1}").isString()
-        new SanityChecker("foo", "${null}").isString()
+        new SanityChecker("foo", "${1}" as String).isString()
+        new SanityChecker("foo", "${null}" as String).isString()
 
         String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isString()
+        }
 
         failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", 1).isString()
         }
 
         failure = shouldFail(IllegalArgumentException) {
-            new SanityChecker("foo", null).isString()
+            new SanityChecker("foo", "${1}").isString()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${null}").isString()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${}").isString()
         }
     }
 }
