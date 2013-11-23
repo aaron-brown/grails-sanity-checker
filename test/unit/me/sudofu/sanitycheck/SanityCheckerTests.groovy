@@ -101,12 +101,58 @@ class SanityCheckerTests {
         }
     }
 
-    void testIsNotEmptyNullPreconditionCases() {
+    void testIsNotEmptyPassIfNullCases() {
         new SanityChecker("foo", null, true).isNotEmpty()
         new SanityChecker("foo", null).isNotEmpty(true)
 
-        String failure = shouldFail(IllegalArgumentException) {
-            new SanityChecker("foo", null).isNotEmpty()
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "", true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "").isNotEmpty(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", '', true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", '').isNotEmpty(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", """""", true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", """""").isNotEmpty(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", '''''', true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", '''''').isNotEmpty(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", [], true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", []).isNotEmpty(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", [:], true).isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", [:]).isNotEmpty(true)
         }
     }
 
@@ -118,6 +164,10 @@ class SanityCheckerTests {
         new SanityChecker("foo", ''' ''').isNotEmpty()
 
         String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isNotEmpty()
+        }
 
         failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", "").isNotEmpty()
@@ -153,15 +203,80 @@ class SanityCheckerTests {
         }
     }
 
-    void testIsStringNullPreconditionCases() {
+    void testIsBooleanPassIfNullCases() {
+        new SanityChecker("foo", null, true).isBoolean()
+        new SanityChecker("foo", null).isBoolean(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1, true).isBoolean()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isBoolean(true)
+        }
+    }
+
+    void testIsBoolean() {
+
+        new SanityChecker("foo", true).isBoolean()
+        new SanityChecker("foo", false).isBoolean()
+        new SanityChecker("foo", 1.asBoolean()).isBoolean()
+        new SanityChecker("foo", 0.asBoolean()).isBoolean()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 0).isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "true").isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "false").isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${true}").isBoolean()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${false}").isBoolean()
+        }
+    }
+
+    void testIsStringPassIfNullCases() {
         new SanityChecker("foo", null, true).isString()
         new SanityChecker("foo", null).isString(true)
 
-        new SanityChecker("foo", "${null}", true).isString()
-        new SanityChecker("foo", "${null}").isString(true)
+        String fail
 
-        new SanityChecker("foo", "${}", true).isString()
-        new SanityChecker("foo", "${}").isString(true)
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${null}", true).isString()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${null}").isString(true)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${}", true).isString()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${}").isString(true)
+        }
     }
 
     void testIsString() {
@@ -194,6 +309,452 @@ class SanityCheckerTests {
 
         failure = shouldFail(IllegalArgumentException) {
             new SanityChecker("foo", "${}").isString()
+        }
+    }
+
+    void testIsNumberPassIfNullCases() {
+        new SanityChecker("foo", null, true).isNumber()
+        new SanityChecker("foo", null).isNumber(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1", true).isNumber()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isNumber(true)
+        }
+    }
+
+    void testIsNumber() {
+
+        new SanityChecker("foo", 1).isNumber()
+        new SanityChecker("foo", 1I).isNumber()
+        new SanityChecker("foo", 1L).isNumber()
+        new SanityChecker("foo", 1G).isNumber()
+        new SanityChecker("foo", 1.0G).isNumber()
+        new SanityChecker("foo", 1.0D).isNumber()
+        new SanityChecker("foo", 1.0F).isNumber()
+        new SanityChecker("foo", 1E10G).isNumber()
+        new SanityChecker("foo", 1E10D).isNumber()
+        new SanityChecker("foo", 1E10F).isNumber()
+        new SanityChecker("foo", 1.0E10G).isNumber()
+        new SanityChecker("foo", 1.0E10D).isNumber()
+        new SanityChecker("foo", 1.0E10F).isNumber()
+        new SanityChecker("foo", 01I).isNumber()
+        new SanityChecker("foo", 01L).isNumber()
+        new SanityChecker("foo", 01G).isNumber()
+        new SanityChecker("foo", 0x1I).isNumber()
+        new SanityChecker("foo", 0x1L).isNumber()
+        new SanityChecker("foo", 0x1G).isNumber()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isNumber()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isNumber()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1}").isNumber()
+        }
+    }
+
+    void testIsIntegerPassIfNullCases() {
+        new SanityChecker("foo", null, true).isInteger()
+        new SanityChecker("foo", null).isInteger(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1", true).isInteger()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isInteger(true)
+        }
+    }
+
+    void testIsInteger() {
+
+        new SanityChecker("foo", 1).isInteger()
+        new SanityChecker("foo", 1I).isInteger()
+        new SanityChecker("foo", 01I).isInteger()
+        new SanityChecker("foo", 0x1I).isInteger()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1L).isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1.0).isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", Long.MAX_VALUE).isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 9223372036854775807).isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isInteger()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1}").isInteger()
+        }
+    }
+
+    void testIsLongPassIfNullCases() {
+        new SanityChecker("foo", null, true).isLong()
+        new SanityChecker("foo", null).isLong(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1", true).isLong()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isLong(true)
+        }
+    }
+
+    void testIsLong() {
+
+        new SanityChecker("foo", 1L).isLong()
+        new SanityChecker("foo", 01L).isLong()
+        new SanityChecker("foo", 0x1L).isLong()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isLong()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isLong()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1.0).isLong()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", Integer.MAX_VALUE).isLong()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1L").isLong()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1L}").isLong()
+        }
+    }
+
+    void testIsBigDecimalPassIfNullCases() {
+        new SanityChecker("foo", null, true).isBigDecimal()
+        new SanityChecker("foo", null).isBigDecimal(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1", true).isBigDecimal()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isBigDecimal(true)
+        }
+    }
+
+    void testIsBigDecimal() {
+
+        new SanityChecker("foo", 1.0).isBigDecimal()
+        new SanityChecker("foo", 1.0G).isBigDecimal()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isBigDecimal()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isBigDecimal()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1G).isBigDecimal()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", Double.MAX_VALUE).isBigDecimal()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1.0G").isBigDecimal()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1.0G}").isBigDecimal()
+        }
+    }
+
+    void testIsDoublePassIfNullCases() {
+        new SanityChecker("foo", null, true).isDouble()
+        new SanityChecker("foo", null).isDouble(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1", true).isDouble()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1").isDouble(true)
+        }
+    }
+
+    void testIsDouble() {
+
+        new SanityChecker("foo", 1D).isDouble()
+        new SanityChecker("foo", 1.0D).isDouble()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1.0).isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1D").isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "1.0D").isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1D}").isDouble()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", "${1.0D}").isDouble()
+        }
+    }
+
+    void testIsListPassIfNullCases() {
+        new SanityChecker("foo", null, true).isList()
+        new SanityChecker("foo", null).isList(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1, true).isList()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isList(true)
+        }
+    }
+
+    void testIsList() {
+
+        new SanityChecker("foo", []).isList()
+        new SanityChecker("foo", [1, 2, 3, "blue", "moon"]).isList()
+        new SanityChecker("foo", 1..10).isList()
+        new SanityChecker("foo", 'a'..'z').isList()
+        new SanityChecker("foo", [[a: 'apple'],[a: 'apricot']].a).isList()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isList()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1..10 as int[]).isList()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 'a'..'z' as String[]).isList()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isList()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", [:]).isList()
+        }
+    }
+
+    void testIsMapPassIfNullCases() {
+        new SanityChecker("foo", null, true).isMap()
+        new SanityChecker("foo", null).isMap(true)
+
+        String fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1, true).isMap()
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isMap(true)
+        }
+    }
+
+    void testIsMap() {
+
+        new SanityChecker("foo", [:]).isMap()
+        new SanityChecker("foo", [a: 'apple', b: 'banana']).isMap()
+
+        String failure
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", null).isMap()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1).isMap()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", 1..10 as int[]).isMap()
+        }
+
+        failure = shouldFail(IllegalArgumentException) {
+            new SanityChecker("foo", []).isMap()
+        }
+    }
+
+    void testCheckFor01() {
+        SanityChecker checker = SanityChecker.checkFor("foo", [a: "apple", b: "banana"]) {
+            isMap()
+            isNotEmpty()
+        }
+
+        assertEquals("foo", checker.name)
+        assertEquals([a: "apple", b: "banana"], checker.entity)
+        assertEquals("parameter", checker.classification)
+        assertFalse(checker.allowPassOnNull)
+
+        String fail
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", [:]) {
+                isMap()
+                isNotEmpty()
+            }
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", null) {
+                isMap()
+                isNotEmpty()
+            }
+        }
+    }
+
+    void testCheckFor02() {
+        SanityChecker checker = SanityChecker.checkFor("foo", [a: "apple", b: "banana"], "bar") {
+            isMap()
+            isNotEmpty()
+        }
+
+        assertEquals("foo", checker.name)
+        assertEquals([a: "apple", b: "banana"], checker.entity)
+        assertEquals("bar", checker.classification)
+        assertFalse(checker.allowPassOnNull)
+
+        String fail
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", [:], "bar") {
+                isMap()
+                isNotEmpty()
+            }
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", null, "bar") {
+                isMap()
+                isNotEmpty()
+            }
+        }
+    }
+
+    void testCheckFor03() {
+        SanityChecker checker = SanityChecker.checkFor("foo", null, true) {
+            isMap()
+            isNotEmpty()
+        }
+
+        assertEquals("foo", checker.name)
+        assertEquals(null, checker.entity)
+        assertEquals("parameter", checker.classification)
+        assertTrue(checker.allowPassOnNull)
+
+        String fail
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", [:], true) {
+                isMap()
+                isNotEmpty()
+            }
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", null, true) {
+                isNotNull()
+                isMap()
+                isNotEmpty()
+            }
+        }
+    }
+
+    void testCheckFor04() {
+        SanityChecker checker = SanityChecker.checkFor("foo", null, "bar", true) {
+            isMap()
+            isNotEmpty()
+        }
+
+        assertEquals("foo", checker.name)
+        assertEquals(null, checker.entity)
+        assertEquals("bar", checker.classification)
+        assertTrue(checker.allowPassOnNull)
+
+        String fail
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", [:], "bar", true) {
+                isMap()
+                isNotEmpty()
+            }
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            SanityChecker.checkFor("foo", null, "bar", true) {
+                isNotNull()
+                isMap()
+                isNotEmpty()
+            }
         }
     }
 }

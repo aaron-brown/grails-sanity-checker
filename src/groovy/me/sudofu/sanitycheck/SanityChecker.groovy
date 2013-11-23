@@ -52,6 +52,50 @@ class SanityChecker {
         this.allowPassOnNull = allowPassOnNull
     }
 
+    public static SanityChecker checkFor(String name, Object entity, Closure closure) throws IllegalArgumentException {
+        Closure runClosure = closure.clone()
+
+        runClosure.delegate = this.newInstance(name, entity)
+        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+
+        runClosure()
+
+        return runClosure.delegate
+    }
+
+    public static SanityChecker checkFor(String name, Object entity, String classification, Closure closure) throws IllegalArgumentException {
+        Closure runClosure = closure.clone()
+
+        runClosure.delegate = this.newInstance(name, entity, classification)
+        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+
+        runClosure()
+
+        return runClosure.delegate
+    }
+
+    public static SanityChecker checkFor(String name, Object entity, boolean allowPassOnNull, Closure closure) throws IllegalArgumentException {
+        Closure runClosure = closure.clone()
+
+        runClosure.delegate = this.newInstance(name, entity, allowPassOnNull)
+        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+
+        runClosure()
+
+        return runClosure.delegate
+    }
+
+    public static SanityChecker checkFor(String name, Object entity, String classification, boolean allowPassOnNull, Closure closure) throws IllegalArgumentException {
+        Closure runClosure = closure.clone()
+
+        runClosure.delegate = this.newInstance(name, entity, classification, allowPassOnNull)
+        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+
+        runClosure()
+
+        return runClosure.delegate
+    }
+
     public void isNotNull() throws IllegalArgumentException {
         if (entity == null) {
             throw new IllegalArgumentException("${classification.capitalize()} ${name} is null.")
@@ -63,7 +107,7 @@ class SanityChecker {
     }
 
     public void isNotEmpty(boolean allowPassOnNull) throws IllegalArgumentException {
-        if (allowPassOnNull) {
+        if (allowPassOnNull && entity == null) {
             return
         }
 
@@ -79,12 +123,28 @@ class SanityChecker {
         }
     }
 
+    public void isBoolean() throws IllegalArgumentException {
+        isBoolean(allowPassOnNull)
+    }
+
+    public void isBoolean(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != Boolean) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Boolean.")
+        }
+    }
+
     public void isString() throws IllegalArgumentException {
         isString(allowPassOnNull)
     }
 
     public void isString(boolean allowPassOnNull) throws IllegalArgumentException {
-        if (allowPassOnNull) {
+        if (allowPassOnNull && entity == null) {
             return
         }
 
@@ -92,6 +152,118 @@ class SanityChecker {
 
         if (entity.getClass() != String) {
             throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a String.")
+        }
+    }
+
+    public void isNumber() throws IllegalArgumentException {
+        isNumber(allowPassOnNull)
+    }
+
+    public void isNumber(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity in Number == false) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Number (or Subclass thereof).")
+        }
+    }
+
+    public void isInteger() throws IllegalArgumentException {
+        isInteger(allowPassOnNull)
+    }
+
+    public void isInteger(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != Integer) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an Integer.")
+        }
+    }
+
+    public void isLong() throws IllegalArgumentException {
+        isLong(allowPassOnNull)
+    }
+
+    public void isLong(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != Long) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Long.")
+        }
+    }
+
+    public void isBigDecimal() throws IllegalArgumentException {
+        isBigDecimal(allowPassOnNull)
+    }
+
+    public void isBigDecimal(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != BigDecimal) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a BigDecimal.")
+        }
+    }
+
+    public void isDouble() throws IllegalArgumentException {
+        isDouble(allowPassOnNull)
+    }
+
+    public void isDouble(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != Double) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not a Double.")
+        }
+    }
+
+    public void isList() throws IllegalArgumentException {
+        isList(allowPassOnNull)
+    }
+
+    public void isList(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity in List == false) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an implementation of List.")
+        }
+    }
+
+    public void isMap() throws IllegalArgumentException {
+        isMap(allowPassOnNull)
+    }
+
+    public void isMap(boolean allowPassOnNull) throws IllegalArgumentException {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity in Map == false) {
+            throw new IllegalArgumentException("${classification.capitalize()} ${name} is not an implementation of Map.")
         }
     }
 }
