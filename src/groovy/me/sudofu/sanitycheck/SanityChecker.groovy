@@ -14,7 +14,7 @@
  */
 package me.sudofu.sanitycheck
 
-import me.sudofu.sanitycheck.SanityCheckException
+import me.sudofu.sanitycheck.SanityCheckReport
 
 /**
  * A utility for performing a wide variety of basic sanity checks on
@@ -42,19 +42,19 @@ class SanityChecker {
      *
      * <p>For example, the name of a method parameter.</p>
      */
-    public final String name
+    protected String name
 
     /**
      * The entity to perform checks on.
      *
      * <p>The value of the entity (intended to be unmondified).</p>
      */
-    public final Object entity
+    protected Object entity
 
     /**
      * The classification of the entity (for error context).
      *
-     * <p>By default, the <code>classification</code> is <b>parameter</b>.</p>
+     * <p>By default, the <code>classification</code> is <b>entity</b>.</p>
      *
      * <p>
      * Other examples:
@@ -66,7 +66,7 @@ class SanityChecker {
      * </ul>
      * </p>
      */
-    public final String classification
+    protected String classification
 
     /**
      * Allows the sanity check to allow <code>null</code> entities to
@@ -79,7 +79,13 @@ class SanityChecker {
      *
      * <p>This behavior can be overridden at the level of any sanity check.</p>
      */
-    public final boolean allowPassOnNull
+    protected boolean allowPassOnNull
+
+    protected UUID currentReport
+
+    protected List<SanityCheckReport> reports
+
+    protected boolean suppressPasses
 
     /**
      * Constructs a basic <b>SanityChecker</b> with <i>parameter</i> as
@@ -95,10 +101,7 @@ class SanityChecker {
      * The entity to perform the sanity check(s) on.
      */
     public SanityChecker(String name, Object entity) {
-        this.name = name
-        this.entity = entity
-        this.classification = "parameter"
-        this.allowPassOnNull = false
+        this(name, entity, null)
     }
 
     /**
@@ -118,291 +121,268 @@ class SanityChecker {
      * A human-understandable classification for the <code>entity</code>.
      */
     public SanityChecker(String name, Object entity, String classification) {
-        this.name = name
+        this.name = name ?: entity.getClass().name
         this.entity = entity
-        this.classification = classification
+        this.classification = classification ?: 'entity'
         this.allowPassOnNull = false
+
+        SanityCheckReport newReport = new SanityCheckReport(this.name, this.classification)
+
+        this.reports = [newReport]
+        this.currentReport = newReport.id
+        this.suppressPasses = true
     }
 
-    /**
-     * Constructs a basic <b>SanityChecker</b> with <i>parameter</i> as
-     * the <b><code>classification</code></b>.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   allowPassOnNull
-     *
-     * Specifies whether to allow or disallow <code>null</code> entities
-     * to pass sanity checks.
-     */
-    public SanityChecker(String name, Object entity, boolean allowPassOnNull) {
-        this.name = name
+    private setName(String arg) {
+
+    }
+
+    private setEntity(Object arg) {
+
+    }
+
+    private setClassification(String arg) {
+
+    }
+
+    public checkOn(String name, Object entity) {
+        checkOn(name, entity, null)
+    }
+
+    public checkOn(String name, Object entity, String classification) {
+        this.name = name ?: entity.getClass().name
         this.entity = entity
-        this.classification = "parameter"
-        this.allowPassOnNull = allowPassOnNull
+        this.classification = classification ?: 'entity'
+
+        SanityCheckReport newReport = new SanityCheckReport(this.name, this.classification)
+
+        this.reports << newReport
+        this.currentReport = newReport.id
     }
 
-    /**
-     * Constructs a basic <b>SanityChecker</b>.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   classification
-     *
-     * A human-understandable classification for the <code>entity</code>.
-     *
-     * @param   allowPassOnNull
-     *
-     * Specifies whether to allow or disallow <code>null</code> entities
-     * to pass sanity checks.
-     */
-    public SanityChecker(String name, Object entity, String classification, boolean allowPassOnNull) {
-        this.name = name
-        this.entity = entity
-        this.classification = classification
-        this.allowPassOnNull = allowPassOnNull
+    private void setCurrentReport(UUID arg) {
+
     }
 
-    public static SanityChecker checkFor(String name, Object entity, Closure closure) throws SanityCheckException {
+    private void setReports(List<SanityCheckReport> arg) {
+
+    }
+
+    protected void pass(String check, String checkDescription) {
+        if (! suppressPasses) {
+            reports.find { it.id == currentReport }.pass(check, checkDescription)
+        }
+    }
+
+    protected void fail(String check, String checkDescription) {
+        reports.find { it.id == currentReport }.fail(check, checkDescription)
+    }
+
+    public boolean hasPasses() {
+        return reports.any { it.hasPasses() }
+    }
+
+    public boolean hasFailures() {
+        return reports.any { it.hasFailures() }
+    }
+
+    public int countPasses() {
+        return getPasses().size()
+    }
+
+    public int countFailures() {
+        return getFailures().size()
+    }
+
+    public List<Map> getPasses() {
+        return reports*.getPasses()
+    }
+
+    public List<Map> getFailures() {
+        return reports*.getFailures()
+    }
+
+    public void checkFor() {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this.newInstance(name, entity)
         runClosure.resolveStrategy = Closure.DELEGATE_FIRST
 
         runClosure()
-
-        return runClosure.delegate
     }
 
-    public static SanityChecker checkFor(String name, Object entity, String classification, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, classification)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static SanityChecker checkFor(String name, Object entity, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, allowPassOnNull)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static SanityChecker checkFor(String name, Object entity, String classification, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, classification, allowPassOnNull)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public void isNotNull() throws SanityCheckException {
+    public boolean isNotNull() {
         if (entity == null) {
-            throw new SanityCheckException(name, entity, classification, "Cannot be null")
+            fail('isNotNull', "Cannot be null")
+            return false
         }
+
+        pass('isNotNull', "Cannot be null")
+        return true
     }
 
-    public void isNotEmpty() throws SanityCheckException {
+    public boolean isNotEmpty() {
         isNotEmpty(allowPassOnNull)
     }
 
-    public void isNotEmpty(boolean allowPassOnNull) throws SanityCheckException {
+    public boolean isNotEmpty(boolean allowPassOnNull) {
         if (allowPassOnNull && entity == null) {
-            return
+            pass('isNotEmpty', 'Cannot be empty')
+            return true
         }
 
-        isNotNull()
+        if (! respondsTo('isEmpty')) {
+            fail('isNotEmpty', 'Cannot be empty')
+            return false
+        }
 
-        if (entity.getMetaClass().respondsTo(entity, 'isEmpty')) {
-            if (entity.isEmpty()) {
-            throw new SanityCheckException(name, entity, classification, "Cannot be empty")
-            }
+        if (entity.isEmpty()) {
+            fail('isNotEmpty', 'Cannot be empty')
+            return false
         }
-        else {
-            throw new SanityCheckException(name, entity, classification, "Does not respond to isEmpty() method (cannot be empty)")
-        }
+
+        pass('isNotEmpty', 'Cannot be empty')
+        return true
     }
 
-    public void isBoolean() throws SanityCheckException {
+    public boolean isBoolean() {
         isBoolean(allowPassOnNull)
     }
 
-    public void isBoolean(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != Boolean) {
-            throw new SanityCheckException(name, entity, classification, "Must be a Boolean")
-        }
+    public boolean isBoolean(boolean allowPassOnNull) {
+        exactClassMatch(Boolean, allowPassOnNull)
     }
 
-    public void isString() throws SanityCheckException {
+    public boolean isString() {
         isString(allowPassOnNull)
     }
 
-    public void isString(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != String) {
-            throw new SanityCheckException(name, entity, classification, "Must be a String")
-        }
+    public boolean isString(boolean allowPassOnNull) {
+        exactClassMatch(String, allowPassOnNull)
     }
 
-    public void isNumber() throws SanityCheckException {
+    public boolean isNumber() {
         isNumber(allowPassOnNull)
     }
 
-    public void isNumber(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity in Number == false) {
-            throw new SanityCheckException(name, entity, classification, "Must be a Number (or subclass thereof)")
-        }
+    public boolean isNumber(boolean allowPassOnNull) {
+        classMatch(Number, allowPassOnNull)
     }
 
-    public void isInteger() throws SanityCheckException {
+    public boolean isInteger() {
         isInteger(allowPassOnNull)
     }
 
-    public void isInteger(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != Integer) {
-            throw new SanityCheckException(name, entity, classification, "Must be an Integer")
-        }
+    public boolean isInteger(boolean allowPassOnNull) {
+        exactClassMatch(Integer, allowPassOnNull)
     }
 
-    public void isLong() throws SanityCheckException {
+    public boolean isLong() {
         isLong(allowPassOnNull)
     }
 
-    public void isLong(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != Long) {
-            throw new SanityCheckException(name, entity, classification, "Must be a Long")
-        }
+    public boolean isLong(boolean allowPassOnNull) {
+        exactClassMatch(Long, allowPassOnNull)
     }
 
-    public void isBigDecimal() throws SanityCheckException {
+    public boolean isBigDecimal() {
         isBigDecimal(allowPassOnNull)
     }
 
-    public void isBigDecimal(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != BigDecimal) {
-            throw new SanityCheckException(name, entity, classification, "Must be a BigDecimal")
-        }
+    public boolean isBigDecimal(boolean allowPassOnNull) {
+        exactClassMatch(BigDecimal, allowPassOnNull)
     }
 
-    public void isDouble() throws SanityCheckException {
+    public boolean isDouble() {
         isDouble(allowPassOnNull)
     }
 
-    public void isDouble(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != Double) {
-            throw new SanityCheckException(name, entity, classification, "Must be a Double")
-        }
+    public boolean isDouble(boolean allowPassOnNull) {
+        exactClassMatch(Double, allowPassOnNull)
     }
 
-    public void isList() throws SanityCheckException {
+    public boolean isList() {
         isList(allowPassOnNull)
     }
 
-    public void isList(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity in List == false) {
-            throw new SanityCheckException(name, entity, classification, "Must be an implementation of List")
-        }
+    public boolean isList(boolean allowPassOnNull) {
+        classMatch(List, allowPassOnNull)
     }
 
-    public void isMap() throws SanityCheckException {
+    public boolean isMap() {
         isMap(allowPassOnNull)
     }
 
-    public void isMap(boolean allowPassOnNull) throws SanityCheckException {
+    public boolean isMap(boolean allowPassOnNull) {
+        classMatch(Map, allowPassOnNull)
+    }
+
+    public boolean respondsTo(String method) {
+        respondsTo(method, allowPassOnNull)
+    }
+
+    public boolean respondsTo(String method, boolean allowPassOnNull) {
         if (allowPassOnNull && entity == null) {
-            return
+            pass('respondsTo', "Must respond to ${method}")
+            return true
         }
 
         isNotNull()
 
-        if (entity in Map == false) {
-            throw new SanityCheckException(name, entity, classification, "Must be an implementation of Map")
+        if (! entity.getMetaClass().respondsTo(entity, method)) {
+            fail('respondsTo', "Must respond to ${method}")
+            return false
         }
+
+        pass('respondsTo', "Must respond to ${method}")
+        return true
     }
 
-    public void exactClassMatch(Class clazz) {
+    public boolean exactClassMatch(Class clazz) {
         exactClassMatch(clazz, allowPassOnNull)
     }
 
-    public void exactClassMatch(Class clazz, boolean allowPassOnNull) {
+    public boolean exactClassMatch(Class clazz, boolean allowPassOnNull) {
         if (allowPassOnNull && entity == null) {
-            return
+            pass('exactClassMatch', "Must be a(n) ${clazz}")
+            return true
         }
 
-        isNotNull()
+        if (! isNotNull()) {
+            fail('exactClassMatch', "Must be a(n) ${clazz}")
+            return false
+        }
 
         if (entity.getClass() != clazz) {
-            throw new SanityCheckException(name, entity, classification, "Must be a ${clazz}")
+            fail('exactClassMatch', "Must be a(n) ${clazz}")
+            return false
         }
+
+        pass('exactClassMatch', "Must be a(n) ${clazz}")
+        return true
+    }
+
+    public boolean classMatch(Class clazz) {
+        classMatch(clazz, allowPassOnNull)
+    }
+
+    public boolean classMatch(Class clazz, boolean allowPassOnNull) {
+        if (allowPassOnNull && entity == null) {
+            pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return true
+        }
+
+        if (! isNotNull()) {
+            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return false
+        }
+
+        if (entity in clazz == false) {
+            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return false
+        }
+
+        pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+        return true
     }
 }

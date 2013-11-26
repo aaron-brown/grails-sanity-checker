@@ -15,7 +15,6 @@
 package me.sudofu.sanitycheck
 
 import me.sudofu.sanitycheck.SanityChecker
-import me.sudofu.sanitycheck.SanityCheckException
 
 import static org.junit.Assert.*
 
@@ -46,8 +45,9 @@ class SanityCheckerTests {
 
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
-        assertEquals("parameter", checker.classification)
+        assertEquals("entity", checker.classification)
         assertFalse(checker.allowPassOnNull)
+        assertTrue(checker.suppressPasses)
     }
 
     void testConstructor02() {
@@ -57,748 +57,430 @@ class SanityCheckerTests {
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
         assertFalse(checker.allowPassOnNull)
+        assertTrue(checker.suppressPasses)
     }
 
-    void testConstructor03() {
-        SanityChecker checker = new SanityChecker("foo", "bar", true)
+    void testCheckOn01() {
+        SanityChecker checker = new SanityChecker("foo", "bar")
+
+        UUID uuid = checker.currentReport
 
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertTrue(checker.allowPassOnNull)
+        assertEquals("entity", checker.classification)
+        assertFalse(checker.allowPassOnNull)
+        assertTrue(checker.suppressPasses)
+
+        checker.checkOn("bar", "baz")
+        assertEquals("bar", checker.name)
+        assertEquals("baz", checker.entity)
+        assertEquals("entity", checker.classification)
+        assertFalse(uuid == checker.currentReport)
     }
 
-    void testConstructor04() {
-        SanityChecker checker = new SanityChecker("foo", "bar", "baz", true)
+    void testCheckOn02() {
+        SanityChecker checker = new SanityChecker("foo", "bar", "baz")
+
+        UUID uuid = checker.currentReport
 
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
-        assertTrue(checker.allowPassOnNull)
+        assertFalse(checker.allowPassOnNull)
+        assertTrue(checker.suppressPasses)
+
+        checker.checkOn("apple", "banana", "cucumber")
+        assertEquals("apple", checker.name)
+        assertEquals("banana", checker.entity)
+        assertEquals("cucumber", checker.classification)
+        assertFalse(uuid == checker.currentReport)
+    }
+
+    void testUnmodifiableSetters() {
+        SanityChecker checker = new SanityChecker("foo", "bar")
+
+        checker.name = "apple"
+        checker.entity = "banana"
+        checker.classification = "cucumber"
+        checker.reports = []
+
+        UUID uuid = UUID.randomUUID()
+
+        checker.currentReport = uuid
+
+        assertEquals("foo", checker.name)
+        assertEquals("bar", checker.entity)
+        assertEquals("entity", checker.classification)
+        assertFalse(checker.reports.isEmpty())
+        assertFalse(checker.currentReport == uuid)
     }
 
     void testIsNotNull() {
+        assertTrue(new SanityChecker("foo", "hello").isNotNull())
 
-        new SanityChecker("foo", "hello").isNotNull()
+        assertFalse(new SanityChecker("foo", String string).isNotNull())
 
-        String failure
+        SanityChecker checker = new SanityChecker("foo", null)
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isNotNull()
-        }
+        assertFalse(checker.isNotNull())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null, true).isNotNull()
-        }
+        checker.allowPassOnNull = true
 
-        String string
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", string).isNotNull()
-        }
+        assertFalse(checker.isNotNull())
     }
 
     void testIsNotEmptyOnIncompatibleEntity() {
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 12345).isNotEmpty()
-        }
+        assertFalse(new SanityChecker("foo", 12345).isNotEmpty())
     }
 
     void testIsNotEmptyPassIfNullCases() {
-        new SanityChecker("foo", null, true).isNotEmpty()
-        new SanityChecker("foo", null).isNotEmpty(true)
+        SanityChecker checker
 
-        String fail
+        checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "", true).isNotEmpty()
-        }
+        assertTrue(checker.isNotEmpty())
+        assertTrue(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "").isNotEmpty(true)
-        }
+        checker.checkOn("foo", "")
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '', true).isNotEmpty()
-        }
+        checker.checkOn("foo", '')
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '').isNotEmpty(true)
-        }
+        checker.checkOn("foo", """""")
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", """""", true).isNotEmpty()
-        }
+        checker.checkOn("foo", '''''')
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", """""").isNotEmpty(true)
-        }
+        checker.checkOn("foo", [])
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '''''', true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '''''').isNotEmpty(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", [], true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", []).isNotEmpty(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", [:], true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", [:]).isNotEmpty(true)
-        }
+        checker.checkOn("foo", [:])
+        assertFalse(checker.isNotEmpty())
+        assertFalse(checker.isNotEmpty(true))
     }
 
-    void testIsNotEmptyOnString() {
+    void testIsNotEmpty() {
+        assertTrue(new SanityChecker("foo", " ").isNotEmpty())
+        assertTrue(new SanityChecker("foo", ' ').isNotEmpty())
 
-        new SanityChecker("foo", " ").isNotEmpty()
-        new SanityChecker("foo", ' ').isNotEmpty()
-        new SanityChecker("foo", """ """).isNotEmpty()
-        new SanityChecker("foo", ''' ''').isNotEmpty()
+        assertTrue(new SanityChecker("foo", """ """).isNotEmpty())
+        assertTrue(new SanityChecker("foo", ''' ''').isNotEmpty())
 
-        String failure
+        assertTrue(new SanityChecker("foo", [null]).isNotEmpty())
+        assertTrue(new SanityChecker("foo", ["a"]).isNotEmpty())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isNotEmpty()
-        }
+        assertTrue(new SanityChecker("foo", [a: null]).isNotEmpty())
+        assertTrue(new SanityChecker("foo", [a: "a"]).isNotEmpty())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "").isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '').isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", """""").isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", '''''').isNotEmpty()
-        }
-    }
-
-    void testIsNotEmptyOnList() {
-        new SanityChecker("foo", [1, 2, 3, "blue", "moon"]).isNotEmpty()
-
-        String failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", []).isNotEmpty()
-        }
-    }
-
-    void testIsNotEmptyOnMap() {
-
-        new SanityChecker("foo", [one: 1, two: 2, three: 3, blue: "moon"]).isNotEmpty()
-
-        String failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", [:]).isNotEmpty()
-        }
+        assertFalse(new SanityChecker("foo", null).isNotEmpty())
+        assertFalse(new SanityChecker("foo", "").isNotEmpty())
+        assertFalse(new SanityChecker("foo", '').isNotEmpty())
+        assertFalse(new SanityChecker("foo", """""").isNotEmpty())
+        assertFalse(new SanityChecker("foo", '''''').isNotEmpty())
+        assertFalse(new SanityChecker("foo", []).isNotEmpty())
+        assertFalse(new SanityChecker("foo", [:]).isNotEmpty())
     }
 
     void testIsBooleanPassIfNullCases() {
-        new SanityChecker("foo", null, true).isBoolean()
-        new SanityChecker("foo", null).isBoolean(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isBoolean())
+        assertTrue(checker.isBoolean(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1, true).isBoolean()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isBoolean(true)
-        }
+        checker.checkOn("foo", 1)
+        assertFalse(checker.isBoolean())
+        assertFalse(checker.isBoolean(true))
     }
 
     void testIsBoolean() {
 
-        new SanityChecker("foo", true).isBoolean()
-        new SanityChecker("foo", false).isBoolean()
-        new SanityChecker("foo", 1.asBoolean()).isBoolean()
-        new SanityChecker("foo", 0.asBoolean()).isBoolean()
+        assertTrue(new SanityChecker("foo", true).isBoolean())
+        assertTrue(new SanityChecker("foo", false).isBoolean())
+        assertTrue(new SanityChecker("foo", 1.asBoolean()).isBoolean())
+        assertTrue(new SanityChecker("foo", 0.asBoolean()).isBoolean())
 
-        String failure
+        assertFalse(new SanityChecker("foo", null).isBoolean())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isBoolean()
-        }
+        assertFalse(new SanityChecker("foo", 0).isBoolean())
+        assertFalse(new SanityChecker("foo", 1).isBoolean())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 0).isBoolean()
-        }
+        assertFalse(new SanityChecker("foo", "true").isBoolean())
+        assertFalse(new SanityChecker("foo", "false").isBoolean())
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isBoolean()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "true").isBoolean()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "false").isBoolean()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${true}").isBoolean()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${false}").isBoolean()
-        }
+        assertFalse(new SanityChecker("foo", "${true}").isBoolean())
+        assertFalse(new SanityChecker("foo", "${false}").isBoolean())
     }
 
     void testIsStringPassIfNullCases() {
-        new SanityChecker("foo", null, true).isString()
-        new SanityChecker("foo", null).isString(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isString())
+        assertTrue(checker.isString(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${null}", true).isString()
-        }
+        checker.checkOn("foo", "${null}")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${null}").isString(true)
-        }
+        assertFalse(checker.isString())
+        assertFalse(checker.isString(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${}", true).isString()
-        }
+        checker.checkOn("foo", "${}")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${}").isString(true)
-        }
+        assertFalse(checker.isString())
+        assertFalse(checker.isString(true))
     }
 
     void testIsString() {
 
-        new SanityChecker("foo", '').isString()
-        new SanityChecker("foo", "").isString()
-        new SanityChecker("foo", '''''').isString()
-        new SanityChecker("foo", """""").isString()
-        new SanityChecker("foo", 1 as String).isString()
-        new SanityChecker("foo", "${1}" as String).isString()
-        new SanityChecker("foo", "${null}" as String).isString()
+        assertTrue(new SanityChecker("foo", '').isString())
+        assertTrue(new SanityChecker("foo", "").isString())
+        assertTrue(new SanityChecker("foo", '''''').isString())
+        assertTrue(new SanityChecker("foo", """""").isString())
+        assertTrue(new SanityChecker("foo", 1 as String).isString())
+        assertTrue(new SanityChecker("foo", "${1}" as String).isString())
+        assertTrue(new SanityChecker("foo", "${null}" as String).isString())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1}").isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${null}").isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${}").isString()
-        }
+        assertFalse(new SanityChecker("foo", null).isString())
+        assertFalse(new SanityChecker("foo", 1).isString())
+        assertFalse(new SanityChecker("foo", "${1}").isString())
+        assertFalse(new SanityChecker("foo", "${null}").isString())
+        assertFalse(new SanityChecker("foo", "${}").isString())
     }
 
     void testIsNumberPassIfNullCases() {
-        new SanityChecker("foo", null, true).isNumber()
-        new SanityChecker("foo", null).isNumber(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isNumber())
+        assertTrue(checker.isNumber(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1", true).isNumber()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isNumber(true)
-        }
+        assertFalse(checker.isNumber())
+        assertFalse(checker.isNumber(true))
     }
 
     void testIsNumber() {
+        assertTrue(new SanityChecker("foo", 1).isNumber())
+        assertTrue(new SanityChecker("foo", 1I).isNumber())
+        assertTrue(new SanityChecker("foo", 1L).isNumber())
+        assertTrue(new SanityChecker("foo", 1G).isNumber())
+        assertTrue(new SanityChecker("foo", 1D).isNumber())
+        assertTrue(new SanityChecker("foo", 1F).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0G).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0D).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0F).isNumber())
+        assertTrue(new SanityChecker("foo", 1E10).isNumber())
+        assertTrue(new SanityChecker("foo", 1E10G).isNumber())
+        assertTrue(new SanityChecker("foo", 1E10D).isNumber())
+        assertTrue(new SanityChecker("foo", 1E10F).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0E10).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0E10G).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0E10D).isNumber())
+        assertTrue(new SanityChecker("foo", 1.0E10F).isNumber())
+        assertTrue(new SanityChecker("foo", 01).isNumber())
+        assertTrue(new SanityChecker("foo", 01I).isNumber())
+        assertTrue(new SanityChecker("foo", 01L).isNumber())
+        assertTrue(new SanityChecker("foo", 01G).isNumber())
+        assertTrue(new SanityChecker("foo", 0x1).isNumber())
+        assertTrue(new SanityChecker("foo", 0x1I).isNumber())
+        assertTrue(new SanityChecker("foo", 0x1L).isNumber())
+        assertTrue(new SanityChecker("foo", 0x1G).isNumber())
 
-        new SanityChecker("foo", 1).isNumber()
-        new SanityChecker("foo", 1I).isNumber()
-        new SanityChecker("foo", 1L).isNumber()
-        new SanityChecker("foo", 1G).isNumber()
-        new SanityChecker("foo", 1D).isNumber()
-        new SanityChecker("foo", 1F).isNumber()
-        new SanityChecker("foo", 1.0).isNumber()
-        new SanityChecker("foo", 1.0G).isNumber()
-        new SanityChecker("foo", 1.0D).isNumber()
-        new SanityChecker("foo", 1.0F).isNumber()
-        new SanityChecker("foo", 1E10).isNumber()
-        new SanityChecker("foo", 1E10G).isNumber()
-        new SanityChecker("foo", 1E10D).isNumber()
-        new SanityChecker("foo", 1E10F).isNumber()
-        new SanityChecker("foo", 1.0E10).isNumber()
-        new SanityChecker("foo", 1.0E10G).isNumber()
-        new SanityChecker("foo", 1.0E10D).isNumber()
-        new SanityChecker("foo", 1.0E10F).isNumber()
-        new SanityChecker("foo", 01).isNumber()
-        new SanityChecker("foo", 01I).isNumber()
-        new SanityChecker("foo", 01L).isNumber()
-        new SanityChecker("foo", 01G).isNumber()
-        new SanityChecker("foo", 0x1).isNumber()
-        new SanityChecker("foo", 0x1I).isNumber()
-        new SanityChecker("foo", 0x1L).isNumber()
-        new SanityChecker("foo", 0x1G).isNumber()
-
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isNumber()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isNumber()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1}").isNumber()
-        }
+        assertFalse(new SanityChecker("foo", null).isNumber())
+        assertFalse(new SanityChecker("foo", "1").isNumber())
+        assertFalse(new SanityChecker("foo", "${1}").isNumber())
     }
 
     void testIsIntegerPassIfNullCases() {
-        new SanityChecker("foo", null, true).isInteger()
-        new SanityChecker("foo", null).isInteger(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isInteger())
+        assertTrue(checker.isInteger(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1", true).isInteger()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isInteger(true)
-        }
+        assertFalse(checker.isInteger())
+        assertFalse(checker.isInteger(true))
     }
 
     void testIsInteger() {
+        assertTrue(new SanityChecker("foo", 1).isInteger())
+        assertTrue(new SanityChecker("foo", 1I).isInteger())
+        assertTrue(new SanityChecker("foo", 01).isInteger())
+        assertTrue(new SanityChecker("foo", 01I).isInteger())
+        assertTrue(new SanityChecker("foo", 0x1).isInteger())
+        assertTrue(new SanityChecker("foo", 0x1I).isInteger())
 
-        new SanityChecker("foo", 1).isInteger()
-        new SanityChecker("foo", 1I).isInteger()
-        new SanityChecker("foo", 01).isInteger()
-        new SanityChecker("foo", 01I).isInteger()
-        new SanityChecker("foo", 0x1).isInteger()
-        new SanityChecker("foo", 0x1I).isInteger()
-
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1L).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1.0).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", Long.MAX_VALUE).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 9223372036854775807).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1}").isInteger()
-        }
+        assertFalse(new SanityChecker("foo", null).isInteger())
+        assertFalse(new SanityChecker("foo", 1L).isInteger())
+        assertFalse(new SanityChecker("foo", 1.0).isInteger())
+        assertFalse(new SanityChecker("foo", Long.MAX_VALUE).isInteger())
+        assertFalse(new SanityChecker("foo", 9223372036854775807).isInteger())
+        assertFalse(new SanityChecker("foo", "1").isInteger())
+        assertFalse(new SanityChecker("foo", "${1}").isInteger())
     }
 
     void testIsLongPassIfNullCases() {
-        new SanityChecker("foo", null, true).isLong()
-        new SanityChecker("foo", null).isLong(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isLong())
+        assertTrue(checker.isLong(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1", true).isLong()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isLong(true)
-        }
+        assertFalse(checker.isLong())
+        assertFalse(checker.isLong(true))
     }
 
     void testIsLong() {
 
-        new SanityChecker("foo", 1L).isLong()
-        new SanityChecker("foo", 01L).isLong()
-        new SanityChecker("foo", 0x1L).isLong()
+        assertTrue(new SanityChecker("foo", 1L).isLong())
+        assertTrue(new SanityChecker("foo", 01L).isLong())
+        assertTrue(new SanityChecker("foo", 0x1L).isLong())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1.0).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", Integer.MAX_VALUE).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1L").isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1L}").isLong()
-        }
+        assertFalse(new SanityChecker("foo", null).isLong())
+        assertFalse(new SanityChecker("foo", 1).isLong())
+        assertFalse(new SanityChecker("foo", 1.0).isLong())
+        assertFalse(new SanityChecker("foo", Integer.MAX_VALUE).isLong())
+        assertFalse(new SanityChecker("foo", "1L").isLong())
+        assertFalse(new SanityChecker("foo", "${1L}").isLong())
     }
 
     void testIsBigDecimalPassIfNullCases() {
-        new SanityChecker("foo", null, true).isBigDecimal()
-        new SanityChecker("foo", null).isBigDecimal(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isBigDecimal())
+        assertTrue(checker.isBigDecimal(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1", true).isBigDecimal()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isBigDecimal(true)
-        }
+        assertFalse(checker.isBigDecimal())
+        assertFalse(checker.isBigDecimal(true))
     }
 
     void testIsBigDecimal() {
 
-        new SanityChecker("foo", 1.0).isBigDecimal()
-        new SanityChecker("foo", 1.0G).isBigDecimal()
+        assertTrue(new SanityChecker("foo", 1.0).isBigDecimal())
+        assertTrue(new SanityChecker("foo", 1.0G).isBigDecimal())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1G).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", Double.MAX_VALUE).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1.0G").isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1.0G}").isBigDecimal()
-        }
+        assertFalse(new SanityChecker("foo", null).isBigDecimal())
+        assertFalse(new SanityChecker("foo", 1).isBigDecimal())
+        assertFalse(new SanityChecker("foo", 1G).isBigDecimal())
+        assertFalse(new SanityChecker("foo", Double.MAX_VALUE).isBigDecimal())
+        assertFalse(new SanityChecker("foo", "1.0G").isBigDecimal())
+        assertFalse(new SanityChecker("foo", "${1.0G}").isBigDecimal())
     }
 
     void testIsDoublePassIfNullCases() {
-        new SanityChecker("foo", null, true).isDouble()
-        new SanityChecker("foo", null).isDouble(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isDouble())
+        assertTrue(checker.isDouble(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1", true).isDouble()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1").isDouble(true)
-        }
+        assertFalse(checker.isDouble())
+        assertFalse(checker.isDouble(true))
     }
 
     void testIsDouble() {
 
-        new SanityChecker("foo", 1D).isDouble()
-        new SanityChecker("foo", 1.0D).isDouble()
+        assertTrue(new SanityChecker("foo", 1D).isDouble())
+        assertTrue(new SanityChecker("foo", 1.0D).isDouble())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1.0).isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1D").isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "1.0D").isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1D}").isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", "${1.0D}").isDouble()
-        }
+        assertFalse(new SanityChecker("foo", null).isDouble())
+        assertFalse(new SanityChecker("foo", 1).isDouble())
+        assertFalse(new SanityChecker("foo", 1.0).isDouble())
+        assertFalse(new SanityChecker("foo", "1D").isDouble())
+        assertFalse(new SanityChecker("foo", "1.0D").isDouble())
+        assertFalse(new SanityChecker("foo", "${1D}").isDouble())
+        assertFalse(new SanityChecker("foo", "${1.0D}").isDouble())
     }
 
     void testIsListPassIfNullCases() {
-        new SanityChecker("foo", null, true).isList()
-        new SanityChecker("foo", null).isList(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isList())
+        assertTrue(checker.isList(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1, true).isList()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isList(true)
-        }
+        assertFalse(checker.isList())
+        assertFalse(checker.isList(true))
     }
 
     void testIsList() {
 
-        new SanityChecker("foo", []).isList()
-        new SanityChecker("foo", [1, 2, 3, "blue", "moon"]).isList()
-        new SanityChecker("foo", 1..10).isList()
-        new SanityChecker("foo", 'a'..'z').isList()
-        new SanityChecker("foo", [[a: 'apple'],[a: 'apricot']].a).isList()
+        assertTrue(new SanityChecker("foo", []).isList())
+        assertTrue(new SanityChecker("foo", [1, 2, 3, "blue", "moon"]).isList())
+        assertTrue(new SanityChecker("foo", 1..10).isList())
+        assertTrue(new SanityChecker("foo", 'a'..'z').isList())
+        assertTrue(new SanityChecker("foo", [[a: 'apple'],[a: 'apricot']].a).isList())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isList()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1..10 as int[]).isList()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 'a'..'z' as String[]).isList()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isList()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", [:]).isList()
-        }
+        assertFalse(new SanityChecker("foo", null).isList())
+        assertFalse(new SanityChecker("foo", 1..10 as int[]).isList())
+        assertFalse(new SanityChecker("foo", 'a'..'z' as String[]).isList())
+        assertFalse(new SanityChecker("foo", 1).isList())
+        assertFalse(new SanityChecker("foo", [:]).isList())
     }
 
     void testIsMapPassIfNullCases() {
-        new SanityChecker("foo", null, true).isMap()
-        new SanityChecker("foo", null).isMap(true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.isMap())
+        assertTrue(checker.isMap(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1, true).isMap()
-        }
+        checker.checkOn("foo", "1")
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isMap(true)
-        }
+        assertFalse(checker.isMap())
+        assertFalse(checker.isMap(true))
     }
 
     void testIsMap() {
 
-        new SanityChecker("foo", [:]).isMap()
-        new SanityChecker("foo", [a: 'apple', b: 'banana']).isMap()
+        assertTrue(new SanityChecker("foo", [:]).isMap())
+        assertTrue(new SanityChecker("foo", [a: 'apple', b: 'banana']).isMap())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).isMap()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).isMap()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1..10 as int[]).isMap()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", []).isMap()
-        }
+        assertFalse(new SanityChecker("foo", null).isMap())
+        assertFalse(new SanityChecker("foo", 1).isMap())
+        assertFalse(new SanityChecker("foo", 1..10 as int[]).isMap())
+        assertFalse(new SanityChecker("foo", []).isMap())
     }
 
     void testExactClassMatchPassIfNullCases() {
-        new SanityChecker("foo", null, true).exactClassMatch(Class)
-        new SanityChecker("foo", null).exactClassMatch(Class, true)
+        SanityChecker checker = new SanityChecker("foo", null)
+        checker.allowPassOnNull = true
 
-        String fail
+        assertTrue(checker.exactClassMatch(Class))
+        assertTrue(checker.exactClassMatch(Class, true))
 
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1, true).exactClassMatch(String)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).exactClassMatch(String, true)
-        }
+        checker.checkOn("foo", 1)
+        assertFalse(checker.exactClassMatch(String))
+        assertFalse(checker.exactClassMatch(String, true))
     }
 
     void testExactClassMatch() {
 
-        new SanityChecker("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass)
+        assertTrue(new SanityChecker("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass))
 
-        String failure
+        assertFalse(new SanityChecker("foo", null).exactClassMatch(SampleUserClass))
 
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", null).exactClassMatch(SampleUserClass)
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new SanityChecker("foo", 1).exactClassMatch(SampleUserClass)
-        }
-    }
-
-    void testCheckFor01() {
-        SanityChecker checker = SanityChecker.checkFor("foo", [a: "apple", b: "banana"]) {
-            isMap()
-            isNotEmpty()
-        }
-
-        assertEquals("foo", checker.name)
-        assertEquals([a: "apple", b: "banana"], checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertFalse(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", [:]) {
-                isMap()
-                isNotEmpty()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", null) {
-                isMap()
-                isNotEmpty()
-            }
-        }
-    }
-
-    void testCheckFor02() {
-        SanityChecker checker = SanityChecker.checkFor("foo", [a: "apple", b: "banana"], "bar") {
-            isMap()
-            isNotEmpty()
-        }
-
-        assertEquals("foo", checker.name)
-        assertEquals([a: "apple", b: "banana"], checker.entity)
-        assertEquals("bar", checker.classification)
-        assertFalse(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", [:], "bar") {
-                isMap()
-                isNotEmpty()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", null, "bar") {
-                isMap()
-                isNotEmpty()
-            }
-        }
-    }
-
-    void testCheckFor03() {
-        SanityChecker checker = SanityChecker.checkFor("foo", null, true) {
-            isMap()
-            isNotEmpty()
-        }
-
-        assertEquals("foo", checker.name)
-        assertEquals(null, checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", [:], true) {
-                isMap()
-                isNotEmpty()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", null, true) {
-                isNotNull()
-                isMap()
-                isNotEmpty()
-            }
-        }
-    }
-
-    void testCheckFor04() {
-        SanityChecker checker = SanityChecker.checkFor("foo", null, "bar", true) {
-            isMap()
-            isNotEmpty()
-        }
-
-        assertEquals("foo", checker.name)
-        assertEquals(null, checker.entity)
-        assertEquals("bar", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", [:], "bar", true) {
-                isMap()
-                isNotEmpty()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            SanityChecker.checkFor("foo", null, "bar", true) {
-                isNotNull()
-                isMap()
-                isNotEmpty()
-            }
-        }
+        assertFalse(new SanityChecker("foo", 1).exactClassMatch(SampleUserClass))
     }
 }
