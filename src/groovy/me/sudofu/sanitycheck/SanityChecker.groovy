@@ -389,4 +389,20 @@ class SanityChecker {
             throw new SanityCheckException(name, entity, classification, "Must be an implementation of Map")
         }
     }
+
+    public void exactClassMatch(Class clazz) {
+        exactClassMatch(clazz, allowPassOnNull)
+    }
+
+    public void exactClassMatch(Class clazz, boolean allowPassOnNull) {
+        if (allowPassOnNull && entity == null) {
+            return
+        }
+
+        isNotNull()
+
+        if (entity.getClass() != clazz) {
+            throw new SanityCheckException(name, entity, classification, "Must be a ${clazz}")
+        }
+    }
 }

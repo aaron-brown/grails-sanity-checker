@@ -29,6 +29,10 @@ import org.junit.*
 @TestMixin(GrailsUnitTestMixin)
 class SanityCheckerTests {
 
+    enum SampleUserClass {
+        SAMPLE_USER_CLASS
+    }
+
     void setUp() {
         // Setup logic here
     }
@@ -655,6 +659,36 @@ class SanityCheckerTests {
 
         failure = shouldFail(SanityCheckException) {
             new SanityChecker("foo", []).isMap()
+        }
+    }
+
+    void testExactClassMatchPassIfNullCases() {
+        new SanityChecker("foo", null, true).exactClassMatch(Class)
+        new SanityChecker("foo", null).exactClassMatch(Class, true)
+
+        String fail
+
+        fail = shouldFail(SanityCheckException) {
+            new SanityChecker("foo", 1, true).exactClassMatch(String)
+        }
+
+        fail = shouldFail(SanityCheckException) {
+            new SanityChecker("foo", 1).exactClassMatch(String, true)
+        }
+    }
+
+    void testExactClassMatch() {
+
+        new SanityChecker("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass)
+
+        String failure
+
+        failure = shouldFail(SanityCheckException) {
+            new SanityChecker("foo", null).exactClassMatch(SampleUserClass)
+        }
+
+        failure = shouldFail(SanityCheckException) {
+            new SanityChecker("foo", 1).exactClassMatch(SampleUserClass)
         }
     }
 
