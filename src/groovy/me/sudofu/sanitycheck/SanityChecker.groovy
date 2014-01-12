@@ -210,17 +210,15 @@ class SanityChecker {
         this.entity = entity
         this.classification = classification ?: 'entity'
 
-        report.reportingOn(this.name, this.classification)
-
         return this
     }
 
     protected void pass(String check, String checkDescription) {
-        report.pass(check, checkDescription)
+        report.pass(name, classification, check, checkDescription)
     }
 
     protected void fail(String check, String checkDescription) {
-        report.fail(check, checkDescription)
+        report.fail(name, classification, check, checkDescription)
     }
 
     public boolean hasPasses() {

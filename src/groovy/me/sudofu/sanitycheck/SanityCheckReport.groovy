@@ -20,37 +20,17 @@ class SanityCheckReport {
         FAIL
     }
 
-    protected String name
-
-    protected String classification
-
     protected List<Map> report
 
     public SanityCheckReport() {
-        this.name = name
-        this.classification = classification
         this.report = []
-    }
-
-    private void setName(String arg) {
-
-    }
-
-    private void setClassification(String arg) {
-
     }
 
     private void setReport(List<Map> arg) {
 
     }
 
-    public SanityCheckReport reportingOn(String name, String classification) {
-        this.name = name
-        this.classification = classification
-        return this
-    }
-
-    public void pass(String check, String checkDescription) {
+    public void pass(String name, String classification, String check, String checkDescription) {
         report << [
             result: Result.PASS,
             name: name,
@@ -60,7 +40,7 @@ class SanityCheckReport {
         ]
     }
 
-    public void fail(String check, String checkDescription) {
+    public void fail(String name, String classification, String check, String checkDescription) {
         report << [
             result: Result.FAIL,
             name: name,

@@ -91,24 +91,15 @@ class SanityCheckerTests {
         assertEquals("bar", checker.entity)
         assertEquals("entity", checker.classification)
 
-        assertEquals("foo", checker.report.name)
-        assertEquals("entity", checker.report.classification)
-
         checker.check("bar", "baz")
         assertEquals("bar", checker.name)
         assertEquals("baz", checker.entity)
         assertEquals("entity", checker.classification)
 
-        assertEquals("bar", checker.report.name)
-        assertEquals("entity", checker.report.classification)
-
         checker.check("foo", "bar", "baz")
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
-
-        assertEquals("foo", checker.report.name)
-        assertEquals("baz", checker.report.classification)
 
         def fail = shouldFail(IllegalArgumentException) {
             checker.check(null, "bar")
@@ -122,14 +113,11 @@ class SanityCheckerTests {
         checker.entity = "banana"
         checker.classification = "cucumber"
 
-        checker.report = new SanityCheckReport().reportingOn('foo', 'bar')
+        checker.report = new SanityCheckReport().pass('foo', 'bar', 'baz', 'bat')
 
         assertNull(checker.name)
         assertNull(checker.entity)
         assertNull(checker.classification)
-
-        assertFalse('foo' == checker.report.name)
-        assertFalse('bar' == checker.report.classification)
 
         assertFalse(checker.hasPasses())
         assertFalse(checker.hasFailures())
