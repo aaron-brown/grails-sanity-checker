@@ -115,22 +115,21 @@ class SanityChecker {
         this.report = new SanityCheckReport()
     }
 
-    private setName(String arg) {
+    protected void setName(String arg) {
 
     }
 
-    private setEntity(Object arg) {
+    protected void setEntity(Object arg) {
 
     }
 
-    private setClassification(String arg) {
+    protected void setClassification(String arg) {
 
     }
 
-    private void setReport(SanityCheckReport arg) {
+    protected void setReport(SanityCheckReport arg) {
 
     }
-
 
     /**
      * Allow <code>null</code> checks to be a valid pass-condition.
@@ -245,7 +244,7 @@ class SanityChecker {
         return report.failures
     }
 
-    private void checkYourselfBeforeYouWreckYourself() throws IllegalStateException {
+    protected void checkYourselfBeforeYouWreckYourself() throws IllegalStateException {
         if (name == null || name.isEmpty()) {
             throw new IllegalStateException("A sanity check has been performed without any indication of the name (and possibly classification) of what is being checked against; check() must be used before running any sanity checks.")
         }
@@ -260,179 +259,6 @@ class SanityChecker {
         }
 
         pass('isNotNull', "Cannot be null")
-        return true
-    }
-
-    public boolean isNotEmpty() throws IllegalStateException {
-        isNotEmpty(allowPassOnNull)
-    }
-
-    public boolean isNotEmpty(boolean allowPassOnNull) throws IllegalStateException {
-        checkYourselfBeforeYouWreckYourself()
-
-        if (allowPassOnNull && entity == null) {
-            pass('isNotEmpty', 'Cannot be empty')
-            return true
-        }
-
-        if (! respondsTo('isEmpty')) {
-            fail('isNotEmpty', 'Cannot be empty')
-            return false
-        }
-
-        if (entity.isEmpty()) {
-            fail('isNotEmpty', 'Cannot be empty')
-            return false
-        }
-
-        pass('isNotEmpty', 'Cannot be empty')
-        return true
-    }
-
-    public boolean isBoolean() throws IllegalStateException {
-        isBoolean(allowPassOnNull)
-    }
-
-    public boolean isBoolean(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(Boolean, allowPassOnNull)
-    }
-
-    public boolean isString() throws IllegalStateException {
-        isString(allowPassOnNull)
-    }
-
-    public boolean isString(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(String, allowPassOnNull)
-    }
-
-    public boolean isNumber() throws IllegalStateException {
-        isNumber(allowPassOnNull)
-    }
-
-    public boolean isNumber(boolean allowPassOnNull) throws IllegalStateException {
-        classMatch(Number, allowPassOnNull)
-    }
-
-    public boolean isInteger() throws IllegalStateException {
-        isInteger(allowPassOnNull)
-    }
-
-    public boolean isInteger(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(Integer, allowPassOnNull)
-    }
-
-    public boolean isLong() throws IllegalStateException {
-        isLong(allowPassOnNull)
-    }
-
-    public boolean isLong(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(Long, allowPassOnNull)
-    }
-
-    public boolean isBigDecimal() throws IllegalStateException {
-        isBigDecimal(allowPassOnNull)
-    }
-
-    public boolean isBigDecimal(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(BigDecimal, allowPassOnNull)
-    }
-
-    public boolean isDouble() throws IllegalStateException {
-        isDouble(allowPassOnNull)
-    }
-
-    public boolean isDouble(boolean allowPassOnNull) throws IllegalStateException {
-        exactClassMatch(Double, allowPassOnNull)
-    }
-
-    public boolean isList() throws IllegalStateException {
-        isList(allowPassOnNull)
-    }
-
-    public boolean isList(boolean allowPassOnNull) throws IllegalStateException {
-        classMatch(List, allowPassOnNull)
-    }
-
-    public boolean isMap() throws IllegalStateException {
-        isMap(allowPassOnNull)
-    }
-
-    public boolean isMap(boolean allowPassOnNull) throws IllegalStateException {
-        classMatch(Map, allowPassOnNull)
-    }
-
-    public boolean respondsTo(String method) {
-        respondsTo(method, allowPassOnNull)
-    }
-
-    public boolean respondsTo(String method, boolean allowPassOnNull) throws IllegalStateException {
-        checkYourselfBeforeYouWreckYourself()
-
-        if (allowPassOnNull && entity == null) {
-            pass('respondsTo', "Must respond to ${method}")
-            return true
-        }
-
-        isNotNull()
-
-        if (! entity.getMetaClass().respondsTo(entity, method)) {
-            fail('respondsTo', "Must respond to ${method}")
-            return false
-        }
-
-        pass('respondsTo', "Must respond to ${method}")
-        return true
-    }
-
-    public boolean exactClassMatch(Class clazz) throws IllegalStateException {
-        exactClassMatch(clazz, allowPassOnNull)
-    }
-
-    public boolean exactClassMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
-        checkYourselfBeforeYouWreckYourself()
-
-        if (allowPassOnNull && entity == null) {
-            pass('exactClassMatch', "Must be a(n) ${clazz}")
-            return true
-        }
-
-        if (! isNotNull()) {
-            fail('exactClassMatch', "Must be a(n) ${clazz}")
-            return false
-        }
-
-        if (entity.getClass() != clazz) {
-            fail('exactClassMatch', "Must be a(n) ${clazz}")
-            return false
-        }
-
-        pass('exactClassMatch', "Must be a(n) ${clazz}")
-        return true
-    }
-
-    public boolean classMatch(Class clazz) throws IllegalStateException {
-        classMatch(clazz, allowPassOnNull)
-    }
-
-    public boolean classMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
-        checkYourselfBeforeYouWreckYourself()
-
-        if (allowPassOnNull && entity == null) {
-            pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
-            return true
-        }
-
-        if (! isNotNull()) {
-            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
-            return false
-        }
-
-        if (entity in clazz == false) {
-            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
-            return false
-        }
-
-        pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
         return true
     }
 }

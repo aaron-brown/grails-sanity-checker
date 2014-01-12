@@ -59,14 +59,14 @@ class CoerciveSanityChecker {
      *
      * <p>For example, the name of a method parameter.</p>
      */
-    public final String name
+    protected String name
 
     /**
      * The entity to perform checks on.
      *
      * <p>The value of the entity (intended to be unmondified).</p>
      */
-    public final Object entity
+    protected Object entity
 
     /**
      * The classification of the entity (for error context).
@@ -83,7 +83,7 @@ class CoerciveSanityChecker {
      * </ul>
      * </p>
      */
-    public final String classification
+    protected String classification
 
     /**
      * Allows the sanity check to allow <code>null</code> entities to
