@@ -81,56 +81,38 @@ class SanityChecker {
      */
     protected boolean allowPassOnNull
 
-    protected UUID currentReport
-
-    protected List<SanityCheckReport> reports
-
-    protected boolean suppressPasses
-
-    /**
-     * Constructs a basic <b>SanityChecker</b> with <i>parameter</i> as
-     * the <b><code>classification</code></b> and which disallows
-     * <code>null</code> to pass sanity checks.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     */
-    public SanityChecker(String name, Object entity) {
-        this(name, entity, null)
-    }
+    protected SanityCheckReport report
 
     /**
      * Constructs a basic <b>SanityChecker</b> which disallows
      * <code>null</code> to pass sanity checks.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   classification
-     *
-     * A human-understandable classification for the <code>entity</code>.
      */
-    public SanityChecker(String name, Object entity, String classification) {
-        this.name = name ?: entity.getClass().name
-        this.entity = entity
-        this.classification = classification ?: 'entity'
-        this.allowPassOnNull = false
+    public SanityChecker() {
+        this(false)
+    }
 
-        SanityCheckReport newReport = new SanityCheckReport(this.name, this.classification)
-
-        this.reports = [newReport]
-        this.currentReport = newReport.id
-        this.suppressPasses = true
+    /**
+     * Constructs a basic <b>SanityChecker</b>, specifying the allowance
+     * of <code>null</code> passing sanity cheks.
+     *
+     * <p>
+     * There are two distinct behaviors of a <b>SanityChecker</b>:
+     *
+     * <ol>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>disallow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>allow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * </ol>
+     * </p>
+     */
+    public SanityChecker(boolean allowPassOnNull) {
+        this.allowPassOnNull = allowPassOnNull
+        this.report = new SanityCheckReport()
     }
 
     private setName(String arg) {
@@ -145,73 +127,135 @@ class SanityChecker {
 
     }
 
-    public checkOn(String name, Object entity) {
-        checkOn(name, entity, null)
+    private void setReport(SanityCheckReport arg) {
+
     }
 
-    public checkOn(String name, Object entity, String classification) {
+
+    /**
+     * Allow <code>null</code> checks to be a valid pass-condition.
+     *
+     * <p>
+     * There are two distinct behaviors of a <b>SanityChecker</b>:
+     *
+     * <ol>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>disallow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>allow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * </ol>
+     * </p>
+     */
+    public SanityChecker allowPassOnNull() {
+        this.allowPassOnNull = true
+        return this
+    }
+
+
+    /**
+     * Disallow <code>null</code> checks to be a valid pass-condition.
+     *
+     * <p>
+     * There are two distinct behaviors of a <b>SanityChecker</b>:
+     *
+     * <ol>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>disallow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>allow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * </ol>
+     * </p>
+     */
+    public SanityChecker disallowPassOnNull() {
+        this.allowPassOnNull = false
+        return this
+    }
+
+    /**
+     * Run the checks via <b>Closure</b>.
+     *
+     * @param   closure
+     *
+     * The <b>Closure</b> containing the sanity checks to execute on.
+     */
+    public SanityChecker runChecks(Closure closure) {
+        Closure runClosure = closure.clone()
+
+        runClosure.delegate = this
+        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+
+        runClosure()
+
+        return runClosure.delegate
+    }
+
+    public SanityChecker check(String name, Object entity) throws IllegalArgumentException {
+        check(name, entity, null)
+    }
+
+    public SanityChecker check(String name, Object entity, String classification) throws IllegalArgumentException {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("The name of the ${classification ?: 'entity'} being checked against was not provided.")
+        }
+
         this.name = name ?: entity.getClass().name
         this.entity = entity
         this.classification = classification ?: 'entity'
 
-        SanityCheckReport newReport = new SanityCheckReport(this.name, this.classification)
+        report.reportingOn(this.name, this.classification)
 
-        this.reports << newReport
-        this.currentReport = newReport.id
-    }
-
-    private void setCurrentReport(UUID arg) {
-
-    }
-
-    private void setReports(List<SanityCheckReport> arg) {
-
+        return this
     }
 
     protected void pass(String check, String checkDescription) {
-        if (! suppressPasses) {
-            reports.find { it.id == currentReport }.pass(check, checkDescription)
-        }
+        report.pass(check, checkDescription)
     }
 
     protected void fail(String check, String checkDescription) {
-        reports.find { it.id == currentReport }.fail(check, checkDescription)
+        report.fail(check, checkDescription)
     }
 
     public boolean hasPasses() {
-        return reports.any { it.hasPasses() }
+        return report.hasPasses()
     }
 
     public boolean hasFailures() {
-        return reports.any { it.hasFailures() }
+        return report.hasFailures()
     }
 
     public int countPasses() {
-        return getPasses().size()
+        return report.countPasses()
     }
 
     public int countFailures() {
-        return getFailures().size()
+        return report.countFailures()
     }
 
     public List<Map> getPasses() {
-        return reports*.getPasses()
+        return report.passes
     }
 
     public List<Map> getFailures() {
-        return reports*.getFailures()
+        return report.failures
     }
 
-    public void checkFor() {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
+    private void checkYourselfBeforeYouWreckYourself() throws IllegalStateException {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalStateException("A sanity check has been performed without any indication of the name (and possibly classification) of what is being checked against; check() must be used before running any sanity checks.")
+        }
     }
 
-    public boolean isNotNull() {
+    public boolean isNotNull() throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (entity == null) {
             fail('isNotNull', "Cannot be null")
             return false
@@ -221,11 +265,13 @@ class SanityChecker {
         return true
     }
 
-    public boolean isNotEmpty() {
+    public boolean isNotEmpty() throws IllegalStateException {
         isNotEmpty(allowPassOnNull)
     }
 
-    public boolean isNotEmpty(boolean allowPassOnNull) {
+    public boolean isNotEmpty(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             pass('isNotEmpty', 'Cannot be empty')
             return true
@@ -245,75 +291,75 @@ class SanityChecker {
         return true
     }
 
-    public boolean isBoolean() {
+    public boolean isBoolean() throws IllegalStateException {
         isBoolean(allowPassOnNull)
     }
 
-    public boolean isBoolean(boolean allowPassOnNull) {
+    public boolean isBoolean(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Boolean, allowPassOnNull)
     }
 
-    public boolean isString() {
+    public boolean isString() throws IllegalStateException {
         isString(allowPassOnNull)
     }
 
-    public boolean isString(boolean allowPassOnNull) {
+    public boolean isString(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(String, allowPassOnNull)
     }
 
-    public boolean isNumber() {
+    public boolean isNumber() throws IllegalStateException {
         isNumber(allowPassOnNull)
     }
 
-    public boolean isNumber(boolean allowPassOnNull) {
+    public boolean isNumber(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(Number, allowPassOnNull)
     }
 
-    public boolean isInteger() {
+    public boolean isInteger() throws IllegalStateException {
         isInteger(allowPassOnNull)
     }
 
-    public boolean isInteger(boolean allowPassOnNull) {
+    public boolean isInteger(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Integer, allowPassOnNull)
     }
 
-    public boolean isLong() {
+    public boolean isLong() throws IllegalStateException {
         isLong(allowPassOnNull)
     }
 
-    public boolean isLong(boolean allowPassOnNull) {
+    public boolean isLong(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Long, allowPassOnNull)
     }
 
-    public boolean isBigDecimal() {
+    public boolean isBigDecimal() throws IllegalStateException {
         isBigDecimal(allowPassOnNull)
     }
 
-    public boolean isBigDecimal(boolean allowPassOnNull) {
+    public boolean isBigDecimal(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(BigDecimal, allowPassOnNull)
     }
 
-    public boolean isDouble() {
+    public boolean isDouble() throws IllegalStateException {
         isDouble(allowPassOnNull)
     }
 
-    public boolean isDouble(boolean allowPassOnNull) {
+    public boolean isDouble(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Double, allowPassOnNull)
     }
 
-    public boolean isList() {
+    public boolean isList() throws IllegalStateException {
         isList(allowPassOnNull)
     }
 
-    public boolean isList(boolean allowPassOnNull) {
+    public boolean isList(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(List, allowPassOnNull)
     }
 
-    public boolean isMap() {
+    public boolean isMap() throws IllegalStateException {
         isMap(allowPassOnNull)
     }
 
-    public boolean isMap(boolean allowPassOnNull) {
+    public boolean isMap(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(Map, allowPassOnNull)
     }
 
@@ -321,7 +367,9 @@ class SanityChecker {
         respondsTo(method, allowPassOnNull)
     }
 
-    public boolean respondsTo(String method, boolean allowPassOnNull) {
+    public boolean respondsTo(String method, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             pass('respondsTo', "Must respond to ${method}")
             return true
@@ -338,11 +386,13 @@ class SanityChecker {
         return true
     }
 
-    public boolean exactClassMatch(Class clazz) {
+    public boolean exactClassMatch(Class clazz) throws IllegalStateException {
         exactClassMatch(clazz, allowPassOnNull)
     }
 
-    public boolean exactClassMatch(Class clazz, boolean allowPassOnNull) {
+    public boolean exactClassMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             pass('exactClassMatch', "Must be a(n) ${clazz}")
             return true
@@ -362,11 +412,13 @@ class SanityChecker {
         return true
     }
 
-    public boolean classMatch(Class clazz) {
+    public boolean classMatch(Class clazz) throws IllegalStateException {
         classMatch(clazz, allowPassOnNull)
     }
 
-    public boolean classMatch(Class clazz, boolean allowPassOnNull) {
+    public boolean classMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
             return true
