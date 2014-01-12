@@ -84,7 +84,7 @@ class SanityChecker {
     protected SanityCheckReport report
 
     /**
-     * Constructs a basic <b>SanityChecker</b> which disallows
+     * Constructs a <b>SanityChecker</b> which disallows
      * <code>null</code> to pass sanity checks.
      */
     public SanityChecker() {
@@ -92,7 +92,7 @@ class SanityChecker {
     }
 
     /**
-     * Constructs a basic <b>SanityChecker</b>, specifying the allowance
+     * Constructs a <b>SanityChecker</b>, specifying the allowance
      * of <code>null</code> passing sanity cheks.
      *
      * <p>
@@ -259,6 +259,107 @@ class SanityChecker {
         }
 
         pass('isNotNull', "Cannot be null")
+        return true
+    }
+
+    public boolean isNotEmpty() throws IllegalStateException {
+        isNotEmpty(allowPassOnNull)
+    }
+
+    public boolean isNotEmpty(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
+        if (allowPassOnNull && entity == null) {
+            pass('isNotEmpty', 'Cannot be empty')
+            return true
+        }
+
+        if (! respondsTo('isEmpty')) {
+            fail('isNotEmpty', 'Cannot be empty')
+            return false
+        }
+
+        if (entity.isEmpty()) {
+            fail('isNotEmpty', 'Cannot be empty')
+            return false
+        }
+
+        pass('isNotEmpty', 'Cannot be empty')
+        return true
+    }
+
+    public boolean respondsTo(String method) {
+        respondsTo(method, allowPassOnNull)
+    }
+
+    public boolean respondsTo(String method, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
+        if (allowPassOnNull && entity == null) {
+            pass('respondsTo', "Must respond to ${method}")
+            return true
+        }
+
+        isNotNull()
+
+        if (! entity.getMetaClass().respondsTo(entity, method)) {
+            fail('respondsTo', "Must respond to ${method}")
+            return false
+        }
+
+        pass('respondsTo', "Must respond to ${method}")
+        return true
+    }
+
+    public boolean exactClassMatch(Class clazz) throws IllegalStateException {
+        exactClassMatch(clazz, allowPassOnNull)
+    }
+
+    public boolean exactClassMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
+        if (allowPassOnNull && entity == null) {
+            pass('exactClassMatch', "Must be a(n) ${clazz}")
+            return true
+        }
+
+        if (! isNotNull()) {
+            fail('exactClassMatch', "Must be a(n) ${clazz}")
+            return false
+        }
+
+        if (entity.getClass() != clazz) {
+            fail('exactClassMatch', "Must be a(n) ${clazz}")
+            return false
+        }
+
+        pass('exactClassMatch', "Must be a(n) ${clazz}")
+        return true
+    }
+
+    public boolean classMatch(Class clazz) throws IllegalStateException {
+        classMatch(clazz, allowPassOnNull)
+    }
+
+    public boolean classMatch(Class clazz, boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
+        if (allowPassOnNull && entity == null) {
+            pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return true
+        }
+
+        if (! isNotNull()) {
+            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return false
+        }
+
+        if (entity in clazz == false) {
+            fail('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
+            return false
+        }
+
+        pass('exactClassMatch', "Must be a(n) ${clazz} (or subclass thereof)")
         return true
     }
 }

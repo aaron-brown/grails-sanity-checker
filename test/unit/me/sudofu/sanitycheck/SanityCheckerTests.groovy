@@ -29,6 +29,10 @@ import org.junit.*
 @TestMixin(GrailsUnitTestMixin)
 class SanityCheckerTests {
 
+    enum SampleUserClass {
+        SAMPLE_USER_CLASS
+    }
+
     void setUp() {
         // Setup logic here
     }
@@ -155,5 +159,261 @@ class SanityCheckerTests {
 
         assertFalse(checker.isNotNull())
         assertFalse(checker.allowPassOnNull().isNotNull())
+    }
+
+    void testIsNotEmptyOnIncompatibleEntity() {
+        assertFalse(new SanityChecker().check("foo", 12345).isNotEmpty())
+    }
+
+    void testIsNotEmptyPassIfNullCases() {
+        SanityChecker checker = new SanityChecker()
+
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().isNotEmpty())
+        assertTrue(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", "")
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", '')
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", """""")
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", '''''')
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", [])
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+
+        checker.check("foo", [:])
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
+    }
+
+    void testIsNotEmpty() {
+        assertTrue(new SanityChecker().check("foo", " ").isNotEmpty())
+        assertTrue(new SanityChecker().check("foo", ' ').isNotEmpty())
+
+        assertTrue(new SanityChecker().check("foo", """ """).isNotEmpty())
+        assertTrue(new SanityChecker().check("foo", ''' ''').isNotEmpty())
+
+        assertTrue(new SanityChecker().check("foo", [null]).isNotEmpty())
+        assertTrue(new SanityChecker().check("foo", ["a"]).isNotEmpty())
+
+        assertTrue(new SanityChecker().check("foo", [a: null]).isNotEmpty())
+        assertTrue(new SanityChecker().check("foo", [a: "a"]).isNotEmpty())
+
+        assertFalse(new SanityChecker().check("foo", null).isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", "").isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", '').isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", """""").isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", '''''').isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", []).isNotEmpty())
+        assertFalse(new SanityChecker().check("foo", [:]).isNotEmpty())
+    }
+
+    void testRespondsToPassIfNullCases() {
+        SanityChecker checker = new SanityChecker()
+
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().respondsTo('foo'))
+        assertTrue(checker.disallowPassOnNull().respondsTo('foo', true))
+
+        checker.check("foo", UUID.randomUUID())
+        assertFalse(checker.allowPassOnNull().respondsTo('isEmpty'))
+        assertFalse(checker.disallowPassOnNull().respondsTo('isEmpty', true))
+    }
+
+    void testRespondsTo() {
+
+        assertTrue(new SanityChecker().check("foo", 1).respondsTo('byteValue'))
+        assertFalse(new SanityChecker().check("foo", 1).respondsTo('isEmpty'))
+
+        assertFalse(new SanityChecker().check("foo", null).respondsTo('isEmpty'))
+    }
+
+    void testExactClassMatchPassIfNullCases() {
+        SanityChecker checker = new SanityChecker()
+
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().exactClassMatch(Class))
+        assertTrue(checker.disallowPassOnNull().exactClassMatch(Class, true))
+
+        checker.check("foo", 1)
+        assertFalse(checker.allowPassOnNull().exactClassMatch(String))
+        assertFalse(checker.disallowPassOnNull().exactClassMatch(String, true))
+    }
+
+    void testExactClassMatch() {
+
+        assertTrue(new SanityChecker().check("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass))
+
+        assertFalse(new SanityChecker().check("foo", null).exactClassMatch(SampleUserClass))
+
+        assertFalse(new SanityChecker().check("foo", 1).exactClassMatch(SampleUserClass))
+    }
+
+    void testClassMatchPassIfNullCases() {
+        SanityChecker checker = new SanityChecker()
+
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().classMatch(Class))
+        assertTrue(checker.disallowPassOnNull().classMatch(Class, true))
+
+        checker.check("foo", 1)
+        assertFalse(checker.allowPassOnNull().classMatch(String))
+        assertFalse(checker.disallowPassOnNull().classMatch(String, true))
+    }
+
+    void testClassMatch() {
+
+        assertTrue(new SanityChecker().check("foo", 1).classMatch(Integer))
+        assertTrue(new SanityChecker().check("foo", 1).classMatch(Number))
+        assertFalse(new SanityChecker().check("foo", 1).classMatch(String))
+
+        assertFalse(new SanityChecker().check("foo", null).classMatch(Integer))
+    }
+
+    void testRunChecks01() {
+        SanityChecker checker = new SanityChecker()
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        checker.runChecks {
+
+            check("foo", 1)
+
+            // Implicit isNotNull
+            exactClassMatch(Integer)
+
+            // Implicit isNotNull
+            classMatch(Number)
+
+            check("bar", null)
+
+            // Implict isNotNull
+            exactClassMatch(Boolean)
+
+            check("baz", [1, 2, 3, 4])
+
+            // Implicit isNotNull
+            // Implicit respondsTo
+            isNotEmpty()
+
+            check("bat", "")
+
+            // Implicit isNotNull
+            exactClassMatch(String)
+
+            // Implicit isNotNull
+            // Implicit respondsTo
+            isNotEmpty()
+        }
+
+        assertTrue(checker.hasPasses())
+        assertTrue(checker.hasFailures())
+
+        assertEquals(11, checker.countPasses())
+        assertEquals(3, checker.countFailures())
+    }
+
+    void testRunChecks02() {
+        SanityChecker checker = new SanityChecker()
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        checker.runChecks {
+
+            allowPassOnNull()
+
+            check("foo", 1)
+
+            // Implicit isNotNull
+            exactClassMatch(Integer)
+
+            // Implicit isNotNull
+            classMatch(Number)
+
+            check("bar", null)
+
+            // Passes because null.
+            exactClassMatch(Boolean)
+
+            check("baz", [1, 2, 3, 4])
+
+            // Implicit isNotNull
+            // Implicit respondsTo
+            isNotEmpty()
+
+            check("bat", "")
+
+            // Implicit isNotNull
+            exactClassMatch(String)
+
+            // Implicit isNotNull
+            // Implicit respondsTo
+            isNotEmpty()
+        }
+
+        assertTrue(checker.hasPasses())
+        assertTrue(checker.hasFailures())
+
+        assertEquals(12, checker.countPasses())
+        assertEquals(1, checker.countFailures())
+    }
+
+    void testCheckYourselfBeforeYouWreckYourself() {
+        def fail
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().isNotNull()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().isNotEmpty(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().respondsTo('foo')
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().respondsTo('foo', false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().exactClassMatch(String)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().exactClassMatch(String, false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().classMatch(Number)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new SanityChecker().classMatch(Number, false)
+        }
     }
 }
