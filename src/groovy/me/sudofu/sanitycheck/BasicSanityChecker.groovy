@@ -17,29 +17,20 @@ package me.sudofu.sanitycheck
 import me.sudofu.sanitycheck.SanityCheckReport
 
 /**
- * A utility for performing a wide variety of basic sanity checks on
- * input, data, parameters, arguments, etc.
- *
- * <p>
- * The <b>SanityChecker</b> provides a variety of basic sanity checks.
- * For each check performed, if any should fail an
- * {@link java.lang.SanityCheckException SanityCheckException}
- * will be thrown, giving a uniform error message.
- * </p>
- *
- * <p>
- * While the use-cases for the <b>SanityChecker</b> itself may be
- * somewhat limited, it gives a good platform for easy expansion and
- * incorperation into more complex derivates of itself.
- * </p>
+ * An implementation of
+ * {@link me.sudofu.sanitycheck.SanityChecker SanityChecker} which
+ * provides mnemonics for sanity-checking various kinds of Classes.
  *
  * @author Aaron Brown
+ *
+ * @see SanityChecker
+ * @see StringCoerciveSanityChecker
  */
 class BasicSanityChecker extends SanityChecker {
 
     /**
-     * Constructs a <b>BasicSanityChecker</b> which disallows
-     * <code>null</code> to pass sanity checks.
+     * Constructs a <b>BasicSanityChecker</b> with the intial behavior
+     * of disallowing <code>null</code> to pass sanity checks.
      */
     public BasicSanityChecker() {
         super()
@@ -62,6 +53,8 @@ class BasicSanityChecker extends SanityChecker {
      * <code>null</code>s to pass the sanity check.
      * </li>
      * </ol>
+     *
+     * If provided, this behavior can be overridden per sanity check.
      * </p>
      */
     public BasicSanityChecker(boolean allowPassOnNull) {

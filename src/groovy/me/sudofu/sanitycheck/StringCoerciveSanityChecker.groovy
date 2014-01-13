@@ -19,36 +19,67 @@ import me.sudofu.sanitycheck.SanityChecker
 import org.codehaus.groovy.runtime.GStringImpl
 
 /**
- * A derivative of the <b><code>StringCoerciveSanityChecker</code></b> which includes
- * automatic handling of Groovy <i>String coercion</i> methods.
+ * An implementation of
+ * {@link me.sudofu.sanitycheck.SanityChecker SanityChecker} which
+ * provides mnemonics for sanity-checking entities and coercing them
+ * if possible.
  *
  * <p>
- * The <b>StringCoerciveSanityChecker</b> provides many of the basic sanity
- * checks found in the <b><code>StringCoerciveSanityChecker</code></b>, however it
- * takes an additional step in handling <b><code>String</code></b>
- * based on its coercive properties to determine if they pass the check.
+ * The <b><code>StringCoerciveSanityChecker</code></b> is designed to
+ * not only provide sanity checks, but also coerce
+ * <b><code>String</code></b> objects into the mnemonic datatype being
+ * checked for.
  * </p>
  *
  * <p>
- * The <b>StringCoerciveSanityChecker</b> is best used in situations where
- * data is either normalized as <b><code>String</code></b>, or where
- * data can be either the datatype <i>or</i> a (coercible)
- * <b><code>String</code></b>.
+ * This has the distinct advantage of being used in places where data
+ * might be normalized, or even allows for that normalization to occur.
+ * For example, a REST resource that operates on JSON. Or,
+ * for sanity-checking Groovy Named-Parameter method signatures. The
+ * very best use-case for this checker is when working with a
+ * <code>Map</code>, since all methods return the entity that is being
+ * checked: pass or fail, coerced or not.
  * </p>
  *
  * <p>
- * There is also the benifit of automatically passing the coerced
- * <b><code>entity</code></b> back, should it pass the check.
+ * An example of use:
+ *
+ * <code><pre>
+ * Map normalizedInput = [
+ *     name: "John Doe",
+ *     age: "42",
+ *     height: '172.72',
+ * ]
+ *
+ * SanityChecker checker = new StringCoerciveSanityChecker()
+ *
+ * normalizedInput.with {
+ *     checker.runChecks {
+ *
+ *         check('name', name)
+ *         isString()
+ *         isNotEmpty()
+ *
+ *         age = check('age', age).isInteger()
+ *
+ *         height = check('height', height).isDouble()
+ *
+ *         maxLong = check('maxLong', maxLong).isInteger()
+ *     }
+ * }
+ * </pre></code>
  * </p>
  *
  * <p>
- * <b>Note</b>: In the cases where non-coercive sanity checks need to be
- * performed, use the
- * {@link me.sudofu.sanitycheck.StringCoerciveSanityChecker StringCoerciveSanityChecker};
- * it performs more strict type-checking.
+ * Note that the behavior of coercion is based on Groovy buil-ins.
+ * Therefore, should Groovy alter the behavior of its coercion, that
+ * will also alter the behavior of this checker.
  * </p>
  *
  * @author Aaron Brown
+ *
+ * @see SanityChecker
+ * @see BasicSanityChecker
  */
 class StringCoerciveSanityChecker extends SanityChecker {
 
