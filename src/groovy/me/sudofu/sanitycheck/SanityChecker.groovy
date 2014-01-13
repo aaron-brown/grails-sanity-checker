@@ -189,7 +189,7 @@ class SanityChecker {
         Closure runClosure = closure.clone()
 
         runClosure.delegate = this
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
+        runClosure.resolveStrategy = Closure.OWNER_FIRST
 
         runClosure()
 

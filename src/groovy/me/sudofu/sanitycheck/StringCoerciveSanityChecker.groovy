@@ -16,23 +16,21 @@ package me.sudofu.sanitycheck
 
 import me.sudofu.sanitycheck.SanityChecker
 
-import me.sudofu.sanitycheck.SanityCheckException
-
 import org.codehaus.groovy.runtime.GStringImpl
 
 /**
- * A derivative of the <b><code>CoerciveSanityChecker</code></b> which includes
+ * A derivative of the <b><code>StringCoerciveSanityChecker</code></b> which includes
  * automatic handling of Groovy <i>String coercion</i> methods.
  *
  * <p>
- * The <b>CoerciveSanityChecker</b> provides many of the basic sanity
- * checks found in the <b><code>CoerciveSanityChecker</code></b>, however it
+ * The <b>StringCoerciveSanityChecker</b> provides many of the basic sanity
+ * checks found in the <b><code>StringCoerciveSanityChecker</code></b>, however it
  * takes an additional step in handling <b><code>String</code></b>
  * based on its coercive properties to determine if they pass the check.
  * </p>
  *
  * <p>
- * The <b>CoerciveSanityChecker</b> is best used in situations where
+ * The <b>StringCoerciveSanityChecker</b> is best used in situations where
  * data is either normalized as <b><code>String</code></b>, or where
  * data can be either the datatype <i>or</i> a (coercible)
  * <b><code>String</code></b>.
@@ -46,289 +44,61 @@ import org.codehaus.groovy.runtime.GStringImpl
  * <p>
  * <b>Note</b>: In the cases where non-coercive sanity checks need to be
  * performed, use the
- * {@link me.sudofu.sanitycheck.CoerciveSanityChecker CoerciveSanityChecker};
+ * {@link me.sudofu.sanitycheck.StringCoerciveSanityChecker StringCoerciveSanityChecker};
  * it performs more strict type-checking.
  * </p>
  *
  * @author Aaron Brown
  */
-class CoerciveSanityChecker {
+class StringCoerciveSanityChecker extends SanityChecker {
 
     /**
-     * The name of the entity (for error context).
-     *
-     * <p>For example, the name of a method parameter.</p>
+     * Constructs a <b>StringCoerciveSanityChecker</b> which disallows
+     * <code>null</code> to pass sanity checks.
      */
-    protected String name
+    public StringCoerciveSanityChecker() {
+        super()
+    }
 
     /**
-     * The entity to perform checks on.
-     *
-     * <p>The value of the entity (intended to be unmondified).</p>
-     */
-    protected Object entity
-
-    /**
-     * The classification of the entity (for error context).
-     *
-     * <p>By default, the <code>classification</code> is <b>parameter</b>.</p>
+     * Constructs a <b>StringCoerciveSanityChecker</b>, specifying the allowance
+     * of <code>null</code> passing sanity cheks.
      *
      * <p>
-     * Other examples:
-     * <ul>
-     * <li>field</li>
-     * <li>variable</li>
-     * <li>input</li>
-     * <li>argument</li>
-     * </ul>
+     * There are two distinct behaviors of a <b>SanityChecker</b>:
+     *
+     * <ol>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>disallow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * <li>
+     * Implicitly check for <code>null</code>, and <i>allow</i>
+     * <code>null</code>s to pass the sanity check.
+     * </li>
+     * </ol>
      * </p>
      */
-    protected String classification
-
-    /**
-     * Allows the sanity check to allow <code>null</code> entities to
-     * pass the check.
-     *
-     * <p>
-     * By default, the behavior of <b>CoerciveSanityChecker</b> is to fail any
-     * check if the <b><code>entity</code></b> is <code>null</code>.
-     * </p>
-     *
-     * <p>This behavior can be overridden at the level of any sanity check.</p>
-     */
-    public final boolean allowPassOnNull
-
-    /**
-     * Constructs a basic <b>CoerciveSanityChecker</b> with <i>parameter</i> as
-     * the <b><code>classification</code></b> and which disallows
-     * <code>null</code> to pass sanity checks.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     */
-    public CoerciveSanityChecker(String name, Object entity) {
-        this.name = name
-        this.entity = entity
-        this.classification = "parameter"
-        this.allowPassOnNull = false
+    public StringCoerciveSanityChecker(boolean allowPassOnNull) {
+        super(allowPassOnNull)
     }
 
-    /**
-     * Constructs a basic <b>CoerciveSanityChecker</b> which disallows
-     * <code>null</code> to pass sanity checks.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   classification
-     *
-     * A human-understandable classification for the <code>entity</code>.
-     */
-    public CoerciveSanityChecker(String name, Object entity, String classification) {
-        this.name = name
-        this.entity = entity
-        this.classification = classification
-        this.allowPassOnNull = false
-    }
-
-    /**
-     * Constructs a basic <b>CoerciveSanityChecker</b> with <i>parameter</i> as
-     * the <b><code>classification</code></b>.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   allowPassOnNull
-     *
-     * Specifies whether to allow or disallow <code>null</code> entities
-     * to pass sanity checks.
-     */
-    public CoerciveSanityChecker(String name, Object entity, boolean allowPassOnNull) {
-        this.name = name
-        this.entity = entity
-        this.classification = "parameter"
-        this.allowPassOnNull = allowPassOnNull
-    }
-
-    /**
-     * Constructs a basic <b>CoerciveSanityChecker</b>.
-     *
-     * @param   name
-     *
-     * A human-understandable label for the <code>entity</code>.
-     *
-     * @param   entity
-     *
-     * The entity to perform the sanity check(s) on.
-     *
-     * @param   classification
-     *
-     * A human-understandable classification for the <code>entity</code>.
-     *
-     * @param   allowPassOnNull
-     *
-     * Specifies whether to allow or disallow <code>null</code> entities
-     * to pass sanity checks.
-     */
-    public CoerciveSanityChecker(String name, Object entity, String classification, boolean allowPassOnNull) {
-        this.name = name
-        this.entity = entity
-        this.classification = classification
-        this.allowPassOnNull = allowPassOnNull
-    }
-
-    public CoerciveSanityChecker(SanityChecker sanityChecker) {
-        this.name = sanityChecker.name
-        this.entity = sanityChecker.entity
-        this.classification = sanityChecker.classification
-        this.allowPassOnNull = sanityChecker.allowPassOnNull
-    }
-
-    public static CoerciveSanityChecker checkFor(String name, Object entity, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static CoerciveSanityChecker checkFor(String name, Object entity, String classification, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, classification)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static CoerciveSanityChecker checkFor(String name, Object entity, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, allowPassOnNull)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static CoerciveSanityChecker checkFor(String name, Object entity, String classification, boolean allowPassOnNull, Closure closure) throws SanityCheckException {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(name, entity, classification, allowPassOnNull)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public static CoerciveSanityChecker checkFor(SanityChecker sanityChecker, Closure closure) {
-        Closure runClosure = closure.clone()
-
-        runClosure.delegate = this.newInstance(sanityChecker)
-        runClosure.resolveStrategy = Closure.DELEGATE_FIRST
-
-        runClosure()
-
-        return runClosure.delegate
-    }
-
-    public void isNotNull() throws SanityCheckException {
-        if (entity == null) {
-            throw new SanityCheckException(name, entity, classification, "Cannot be null")
-        }
-    }
-
-    public void isNotEmpty() throws SanityCheckException {
-        isNotEmpty(allowPassOnNull)
-    }
-
-    public void isNotEmpty(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entity.getMetaClass().respondsTo(entity, 'isEmpty')) {
-            if (entity.isEmpty()) {
-            throw new SanityCheckException(name, entity, classification, "Cannot be empty")
-            }
-        }
-        else {
-            throw new SanityCheckException(name, entity, classification, "Does not respond to isEmpty() method (cannot be empty)")
-        }
-    }
-
-    public String isString() throws SanityCheckException {
+    public Object isString() throws IllegalStateException {
         isString(allowPassOnNull)
     }
 
-    public String isString(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return entity
-        }
-
-        isNotNull()
-
-        if (entity.getClass() != String) {
-            throw new SanityCheckException(name, entity, classification, "Must be a String")
-        }
-
+    public Object isString(boolean allowPassOnNull) throws IllegalStateException {
+        exactClassMatch(String, allowPassOnNull)
         return entity
     }
 
-    public void isNumber() throws SanityCheckException {
-        isNumber(allowPassOnNull)
-    }
-
-    public void isNumber(boolean allowPassOnNull) throws SanityCheckException {
-        if (allowPassOnNull && entity == null) {
-            return
-        }
-
-        isNotNull()
-
-        if (entityIsCoercible()) {
-            if (entity.isNumber()) {
-                return
-            }
-            else {
-                throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Number")
-            }
-        }
-
-        if (entity in Number == false) {
-            throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Number")
-        }
-    }
-
-    public Integer isInteger() throws SanityCheckException {
+    public Object isInteger() throws IllegalStateException {
         return isInteger(allowPassOnNull)
     }
 
-    public Integer isInteger(boolean allowPassOnNull) throws SanityCheckException {
+    public Object isInteger(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             return entity
         }
@@ -337,25 +107,26 @@ class CoerciveSanityChecker {
 
         if (entityIsCoercible()) {
             if (entity.isInteger()) {
+                pass('coercibleClassMatch', 'Must be a(n) Integer, or String coercible to Integer')
                 return entity.toInteger()
             }
             else {
-                throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Integer")
+                fail('coercibleClassMatch', 'Must be a(n) Integer, or String coercible to Integer')
             }
         }
 
-        if (entity.getClass() != Integer) {
-            throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Integer")
-        }
+        exactClassMatch(Integer)
 
         return entity
     }
 
-    public Long isLong() throws SanityCheckException {
+    public Object isLong() throws IllegalStateException {
         isLong(allowPassOnNull)
     }
 
-    public Long isLong(boolean allowPassOnNull) throws SanityCheckException {
+    public Object isLong(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             return entity
         }
@@ -364,25 +135,26 @@ class CoerciveSanityChecker {
 
         if (entityIsCoercible()) {
             if (entity.isLong()) {
+                pass('coercibleClassMatch', 'Must be a(n) Long, or String coercible to Long')
                 return entity.toLong()
             }
             else {
-                throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Long")
+                fail('coercibleClassMatch', 'Must be a(n) Long, or String coercible to Long')
             }
         }
 
-        if (entity.getClass() != Long) {
-            throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Long")
-        }
+        exactClassMatch(Long)
 
         return entity
     }
 
-    public BigDecimal isBigDecimal() throws SanityCheckException {
+    public Object isBigDecimal() throws IllegalStateException {
         isBigDecimal(allowPassOnNull)
     }
 
-    public BigDecimal isBigDecimal(boolean allowPassOnNull) throws SanityCheckException {
+    public Object isBigDecimal(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             return entity
         }
@@ -391,25 +163,26 @@ class CoerciveSanityChecker {
 
         if (entityIsCoercible()) {
             if (entity.isBigDecimal()) {
+                pass('coercibleClassMatch', 'Must be a(n) BigDecimal, or String coercible to BigDecimal')
                 return entity.toBigDecimal()
             }
             else {
-                throw new SanityCheckException(name, entity, classification, "Must be a (coercible) BigDecimal")
+                fail('coercibleClassMatch', 'Must be a(n) BigDecimal, or String coercible to BigDecimal')
             }
         }
 
-        if (entity.getClass() != BigDecimal) {
-            throw new SanityCheckException(name, entity, classification, "Must be a (coercible) BigDecimal")
-        }
+        exactClassMatch(BigDecimal)
 
         return entity
     }
 
-    public Double isDouble() throws SanityCheckException {
+    public Object isDouble() throws IllegalStateException {
         isDouble(allowPassOnNull)
     }
 
-    public Double isDouble(boolean allowPassOnNull) throws SanityCheckException {
+    public Object isDouble(boolean allowPassOnNull) throws IllegalStateException {
+        checkYourselfBeforeYouWreckYourself()
+
         if (allowPassOnNull && entity == null) {
             return entity
         }
@@ -418,16 +191,15 @@ class CoerciveSanityChecker {
 
         if (entityIsCoercible()) {
             if (entity.isDouble()) {
+                pass('coercibleClassMatch', 'Must be a(n) Double, or String coercible to Double')
                 return entity.toDouble()
             }
             else {
-                throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Double")
+                fail('coercibleClassMatch', 'Must be a(n) Double, or String coercible to Double')
             }
         }
 
-        if (entity.getClass() != Double) {
-            throw new SanityCheckException(name, entity, classification, "Must be a (coercible) Double")
-        }
+        exactClassMatch(Double)
 
         return entity
     }

@@ -14,9 +14,8 @@
  */
 package me.sudofu.sanitycheck
 
-import me.sudofu.sanitycheck.SanityChecker
-import me.sudofu.sanitycheck.CoerciveSanityChecker
-import me.sudofu.sanitycheck.SanityCheckException
+import me.sudofu.sanitycheck.SanityCheckReport
+import me.sudofu.sanitycheck.StringCoerciveSanityChecker
 
 import static org.junit.Assert.*
 
@@ -28,7 +27,11 @@ import org.junit.*
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
  */
 @TestMixin(GrailsUnitTestMixin)
-class CoerciveSanityCheckerTests {
+class StringCoerciveSanityCheckerTests {
+
+    enum SampleUserClass {
+        SAMPLE_USER_CLASS
+    }
 
     void setUp() {
         // Setup logic here
@@ -39,631 +42,554 @@ class CoerciveSanityCheckerTests {
     }
 
     void testConstructor01() {
-        CoerciveSanityChecker checker = new CoerciveSanityChecker("foo", "bar")
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals("foo", checker.name)
-        assertEquals("bar", checker.entity)
-        assertEquals("parameter", checker.classification)
+        assertNull(checker.name)
+        assertNull(checker.entity)
+        assertNull(checker.classification)
+
         assertFalse(checker.allowPassOnNull)
+
+        assertNotNull(checker.report)
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        assertEquals([], checker.passes)
+        assertEquals([], checker.failures)
     }
 
     void testConstructor02() {
-        CoerciveSanityChecker checker = new CoerciveSanityChecker("foo", "bar", "baz")
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker(true)
 
+        assertNull(checker.name)
+        assertNull(checker.entity)
+        assertNull(checker.classification)
+
+        assertTrue(checker.allowPassOnNull)
+
+        assertNotNull(checker.report)
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        assertEquals([], checker.passes)
+        assertEquals([], checker.failures)
+    }
+
+    void testCheck() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
+
+        checker.check("foo", "bar")
+        assertEquals("foo", checker.name)
+        assertEquals("bar", checker.entity)
+        assertEquals("entity", checker.classification)
+
+        checker.check("bar", "baz")
+        assertEquals("bar", checker.name)
+        assertEquals("baz", checker.entity)
+        assertEquals("entity", checker.classification)
+
+        checker.check("foo", "bar", "baz")
         assertEquals("foo", checker.name)
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
+
+        def fail = shouldFail(IllegalArgumentException) {
+            checker.check(null, "bar")
+        }
+    }
+
+    void testUnmodifiableSetters() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
+
+        checker.name = "apple"
+        checker.entity = "banana"
+        checker.classification = "cucumber"
+
+        checker.report = new SanityCheckReport().pass('foo', 'bar', 'baz', 'bat')
+
+        assertNull(checker.name)
+        assertNull(checker.entity)
+        assertNull(checker.classification)
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        assertEquals([], checker.passes)
+        assertEquals([], checker.failures)
+    }
+
+    void testAllowPassOnNull() {
+        assertFalse(new StringCoerciveSanityChecker().allowPassOnNull)
+        assertFalse(new StringCoerciveSanityChecker(false).allowPassOnNull)
+        assertTrue(new StringCoerciveSanityChecker(true).allowPassOnNull)
+
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
+
+        checker.allowPassOnNull = true
+        assertTrue(checker.allowPassOnNull)
+
+        checker.allowPassOnNull = false
+        assertFalse(checker.allowPassOnNull)
+
+        checker.allowPassOnNull()
+        assertTrue(checker.allowPassOnNull)
+
+        checker.disallowPassOnNull()
         assertFalse(checker.allowPassOnNull)
     }
 
-    void testConstructor03() {
-        CoerciveSanityChecker checker = new CoerciveSanityChecker("foo", "bar", true)
-
-        assertEquals("foo", checker.name)
-        assertEquals("bar", checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-    }
-
-    void testConstructor04() {
-        CoerciveSanityChecker checker = new CoerciveSanityChecker("foo", "bar", "baz", true)
-
-        assertEquals("foo", checker.name)
-        assertEquals("bar", checker.entity)
-        assertEquals("baz", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-    }
-
-    void testConstructor05() {
-        SanityChecker baseChecker = new SanityChecker("foo", "bar", "baz", true)
-        CoerciveSanityChecker checker = new CoerciveSanityChecker(baseChecker)
-
-        assertEquals("foo", checker.name)
-        assertEquals("bar", checker.entity)
-        assertEquals("baz", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-    }
-
     void testIsNotNull() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        new CoerciveSanityChecker("foo", "hello").isNotNull()
+        checker.check("foo", "hello")
+        assertTrue(checker.isNotNull())
 
-        String failure
+        checker.check("foo", null)
 
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isNotNull()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null, true).isNotNull()
-        }
-
-        String string
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", string).isNotNull()
-        }
+        assertFalse(checker.isNotNull())
+        assertFalse(checker.allowPassOnNull().isNotNull())
     }
 
     void testIsNotEmptyOnIncompatibleEntity() {
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 12345).isNotEmpty()
-        }
+        assertFalse(new StringCoerciveSanityChecker().check("foo", 12345).isNotEmpty())
     }
 
     void testIsNotEmptyPassIfNullCases() {
-        new CoerciveSanityChecker("foo", null, true).isNotEmpty()
-        new CoerciveSanityChecker("foo", null).isNotEmpty(true)
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().isNotEmpty())
+        assertTrue(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "", true).isNotEmpty()
-        }
+        checker.check("foo", "")
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "").isNotEmpty(true)
-        }
+        checker.check("foo", '')
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '', true).isNotEmpty()
-        }
+        checker.check("foo", """""")
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '').isNotEmpty(true)
-        }
+        checker.check("foo", '''''')
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", """""", true).isNotEmpty()
-        }
+        checker.check("foo", [])
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", """""").isNotEmpty(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '''''', true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '''''').isNotEmpty(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", [], true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", []).isNotEmpty(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", [:], true).isNotEmpty()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", [:]).isNotEmpty(true)
-        }
+        checker.check("foo", [:])
+        assertFalse(checker.allowPassOnNull().isNotEmpty())
+        assertFalse(checker.disallowPassOnNull().isNotEmpty(true))
     }
 
-    void testIsNotEmptyOnString() {
+    void testIsNotEmpty() {
+        assertTrue(new StringCoerciveSanityChecker().check("foo", " ").isNotEmpty())
+        assertTrue(new StringCoerciveSanityChecker().check("foo", ' ').isNotEmpty())
 
-        new CoerciveSanityChecker("foo", " ").isNotEmpty()
-        new CoerciveSanityChecker("foo", ' ').isNotEmpty()
-        new CoerciveSanityChecker("foo", """ """).isNotEmpty()
-        new CoerciveSanityChecker("foo", ''' ''').isNotEmpty()
+        assertTrue(new StringCoerciveSanityChecker().check("foo", """ """).isNotEmpty())
+        assertTrue(new StringCoerciveSanityChecker().check("foo", ''' ''').isNotEmpty())
 
-        String failure
+        assertTrue(new StringCoerciveSanityChecker().check("foo", [null]).isNotEmpty())
+        assertTrue(new StringCoerciveSanityChecker().check("foo", ["a"]).isNotEmpty())
 
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isNotEmpty()
-        }
+        assertTrue(new StringCoerciveSanityChecker().check("foo", [a: null]).isNotEmpty())
+        assertTrue(new StringCoerciveSanityChecker().check("foo", [a: "a"]).isNotEmpty())
 
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "").isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '').isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", """""").isNotEmpty()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", '''''').isNotEmpty()
-        }
-    }
-
-    void testIsNotEmptyOnList() {
-        new CoerciveSanityChecker("foo", [1, 2, 3, "blue", "moon"]).isNotEmpty()
-
-        String failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", []).isNotEmpty()
-        }
-    }
-
-    void testIsNotEmptyOnMap() {
-
-        new CoerciveSanityChecker("foo", [one: 1, two: 2, three: 3, blue: "moon"]).isNotEmpty()
-
-        String failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", [:]).isNotEmpty()
-        }
+        assertFalse(new StringCoerciveSanityChecker().check("foo", null).isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", "").isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", '').isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", """""").isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", '''''').isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", []).isNotEmpty())
+        assertFalse(new StringCoerciveSanityChecker().check("foo", [:]).isNotEmpty())
     }
 
     void testIsStringPassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isString())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isString(true))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        checker.allowPassOnNull().isString()
+        checker.disallowPassOnNull().isString(true)
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${null}", true).isString()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${null}").isString(true)
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${}", true).isString()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${}").isString(true)
-        }
+        assertFalse(checker.hasFailures())
     }
 
     void testIsString() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals('', new CoerciveSanityChecker("foo", '').isString())
-        assertEquals("", new CoerciveSanityChecker("foo", "").isString())
-        assertEquals('''''', new CoerciveSanityChecker("foo", '''''').isString())
-        assertEquals("""""", new CoerciveSanityChecker("foo", """""").isString())
-        assertEquals("1", new CoerciveSanityChecker("foo", 1 as String).isString())
-        assertEquals("1", new CoerciveSanityChecker("foo", "${1}" as String).isString())
-        assertEquals("null", new CoerciveSanityChecker("foo", "${null}" as String).isString())
-
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1).isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${1}").isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${null}").isString()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${}").isString()
-        }
-    }
-
-    void testIsNumberPassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isNumber())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isNumber(true))
-
-        String fail
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "apple", true).isNumber()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "apple").isNumber(true)
-        }
-    }
-
-    void testIsNumber() {
-
-        new CoerciveSanityChecker("foo", 1).isNumber()
-        new CoerciveSanityChecker("foo", "1").isNumber()
-        new CoerciveSanityChecker("foo", "${1}").isNumber()
-        new CoerciveSanityChecker("foo", 1I).isNumber()
-        new CoerciveSanityChecker("foo", 1L).isNumber()
-        new CoerciveSanityChecker("foo", 1G).isNumber()
-        new CoerciveSanityChecker("foo", 1D).isNumber()
-        new CoerciveSanityChecker("foo", 1F).isNumber()
-        new CoerciveSanityChecker("foo", 1.0).isNumber()
-        new CoerciveSanityChecker("foo", "1.0").isNumber()
-        new CoerciveSanityChecker("foo", 1.0G).isNumber()
-        new CoerciveSanityChecker("foo", 1.0D).isNumber()
-        new CoerciveSanityChecker("foo", 1.0F).isNumber()
-        new CoerciveSanityChecker("foo", 1E10).isNumber()
-        new CoerciveSanityChecker("foo", "1E10").isNumber()
-        new CoerciveSanityChecker("foo", 1E10G).isNumber()
-        new CoerciveSanityChecker("foo", 1E10D).isNumber()
-        new CoerciveSanityChecker("foo", 1E10F).isNumber()
-        new CoerciveSanityChecker("foo", 1.0E10).isNumber()
-        new CoerciveSanityChecker("foo", "1.0E10").isNumber()
-        new CoerciveSanityChecker("foo", 1.0E10G).isNumber()
-        new CoerciveSanityChecker("foo", 1.0E10D).isNumber()
-        new CoerciveSanityChecker("foo", 1.0E10F).isNumber()
-        new CoerciveSanityChecker("foo", 01).isNumber()
-        new CoerciveSanityChecker("foo", "01").isNumber()
-        new CoerciveSanityChecker("foo", 01I).isNumber()
-        new CoerciveSanityChecker("foo", 01L).isNumber()
-        new CoerciveSanityChecker("foo", 01G).isNumber()
-        new CoerciveSanityChecker("foo", 0x1).isNumber()
-        new CoerciveSanityChecker("foo", 0x1I).isNumber()
-        new CoerciveSanityChecker("foo", 0x1L).isNumber()
-        new CoerciveSanityChecker("foo", 0x1G).isNumber()
-
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isNumber()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1I").isNumber()
-        }
-
-        // See tests for double; this passes in that case.
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1D").isNumber()
-        }
-
-        // See tests for double; this passes in that case.
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0D").isNumber()
-        }
-
-        // See tests for double; this passes in that case.
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1E10D").isNumber()
-        }
-
-        // See tests for double; this passes in that case.
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0E10D").isNumber()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "0x1").isNumber()
-        }
+        assertEquals('', checker.check("foo", '').isString())
+        assertEquals("", checker.check("foo", "").isString())
+        assertEquals('''''', checker.check("foo", '''''').isString())
+        assertEquals("""""", checker.check("foo", """""").isString())
+        assertEquals("1", checker.check("foo", 1 as String).isString())
+        assertEquals("1", checker.check("foo", "${1}" as String).isString())
+        assertEquals("null", checker.check("foo", "${null}" as String).isString())
+        assertNull(checker.check("foo", null).isString())
+        assertEquals(1, checker.check("foo", 1).isString())
+        assertEquals("${1}", checker.check("foo", "${1}").isString())
+        assertEquals("${null}", checker.check("foo", "${null}").isString())
+        assertEquals("${}", checker.check("foo", "${}").isString())
     }
 
     void testIsIntegerPassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isInteger())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isInteger(true))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        checker.allowPassOnNull().isInteger()
+        checker.disallowPassOnNull().isInteger(true)
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1I", true).isInteger()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1I").isInteger(true)
-        }
+        assertFalse(checker.hasFailures())
     }
 
     void testIsInteger() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals(1, new CoerciveSanityChecker("foo", 1).isInteger())
-        assertEquals(1, new CoerciveSanityChecker("foo", "1").isInteger())
-        assertEquals(1I, new CoerciveSanityChecker("foo", 1I).isInteger())
-        assertEquals(01, new CoerciveSanityChecker("foo", 01).isInteger())
-        assertEquals(01I, new CoerciveSanityChecker("foo", 01I).isInteger())
-        assertEquals(0x1, new CoerciveSanityChecker("foo", 0x1).isInteger())
-        assertEquals(0x1I, new CoerciveSanityChecker("foo", 0x1I).isInteger())
+        assertEquals(1, checker.check("foo", 1).isInteger())
+        assertEquals(1, checker.check("foo", 1I).isInteger())
+        assertEquals(1, checker.check("foo", 01).isInteger())
+        assertEquals(1, checker.check("foo", 01I).isInteger())
+        assertEquals(1, checker.check("foo", 0x1).isInteger())
+        assertEquals(1, checker.check("foo", 0x1I).isInteger())
+        assertEquals(1, checker.check("foo", 1 as String).isInteger())
+        assertEquals(1, checker.check("foo", 1I as String).isInteger())
+        assertEquals(1, checker.check("foo", 01 as String).isInteger())
+        assertEquals(1, checker.check("foo", 01I as String).isInteger())
+        assertEquals(1, checker.check("foo", 0x1 as String).isInteger())
+        assertEquals(1, checker.check("foo", 0x1I as String).isInteger())
+        assertEquals(1, checker.check("foo", "1").isInteger())
+        assertEquals(1, checker.check("foo", "01").isInteger())
+        assertEquals(1, checker.check("foo", "${1}").isInteger())
+        assertEquals(1, checker.check("foo", "${01}").isInteger())
+        assertEquals(1, checker.check("foo", "${1I}").isInteger())
+        assertEquals(1, checker.check("foo", "${01I}").isInteger())
+        assertEquals(1, checker.check("foo", "${0x1}").isInteger())
+        assertEquals(1, checker.check("foo", "${0x1I}").isInteger())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1I").isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1L).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1.0).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", Long.MAX_VALUE).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 9223372036854775807).isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "9223372036854775807").isInteger()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "${9223372036854775807}").isInteger()
-        }
+        assertEquals("1I", checker.check("foo", "1I").isInteger())
+        assertEquals("01I", checker.check("foo", "01I").isInteger())
+        assertEquals("0x1", checker.check("foo", "0x1").isInteger())
+        assertEquals("0x1I", checker.check("foo", "0x1I").isInteger())
+        assertEquals(null, checker.check("foo", null).isInteger())
+        assertTrue(checker.check("foo", 1L).isLong().getClass() == Long)
+        assertTrue(checker.check("foo", 1.0).isLong().getClass() == BigDecimal)
+        assertEquals(Long.MAX_VALUE, checker.check("foo", Long.MAX_VALUE).isInteger())
+        assertTrue(checker.check("foo", 9223372036854775807).isInteger().getClass() == Long)
     }
 
     void testIsLongPassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isLong())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isLong(true))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        checker.allowPassOnNull().isLong()
+        checker.disallowPassOnNull().isLong(true)
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1L", true).isLong()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1L").isLong(true)
-        }
+        assertFalse(checker.hasFailures())
     }
 
     void testIsLong() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals(1 as Long, new CoerciveSanityChecker("foo", "1").isLong())
-        assertEquals(1 as Long, new CoerciveSanityChecker("foo", 1L).isLong())
-        assertEquals(01 as Long, new CoerciveSanityChecker("foo", "01").isLong())
-        assertEquals(01L, new CoerciveSanityChecker("foo", 01L).isLong())
-        assertEquals(0x1L, new CoerciveSanityChecker("foo", 0x1L).isLong())
+        assertEquals(1, checker.check("foo", 1).isLong())
+        assertEquals(1, checker.check("foo", 1L).isLong())
+        assertEquals(1, checker.check("foo", 01).isLong())
+        assertEquals(1, checker.check("foo", 01L).isLong())
+        assertEquals(1, checker.check("foo", 0x1).isLong())
+        assertEquals(1, checker.check("foo", 0x1L).isLong())
+        assertEquals(1, checker.check("foo", 1 as String).isLong())
+        assertEquals(1, checker.check("foo", 1L as String).isLong())
+        assertEquals(1, checker.check("foo", 01 as String).isLong())
+        assertEquals(1, checker.check("foo", 01L as String).isLong())
+        assertEquals(1, checker.check("foo", 0x1 as String).isLong())
+        assertEquals(1, checker.check("foo", 0x1L as String).isLong())
+        assertEquals(1, checker.check("foo", "1").isLong())
+        assertEquals(1, checker.check("foo", "01").isLong())
+        assertEquals(1, checker.check("foo", "${1}").isLong())
+        assertEquals(1, checker.check("foo", "${01}").isLong())
+        assertEquals(1, checker.check("foo", "${1L}").isLong())
+        assertEquals(1, checker.check("foo", "${01L}").isLong())
+        assertEquals(1, checker.check("foo", "${0x1}").isLong())
+        assertEquals(1, checker.check("foo", "${0x1L}").isLong())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1.0).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", Integer.MAX_VALUE).isLong()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1L").isLong()
-        }
+        assertEquals("1L", checker.check("foo", "1L").isLong())
+        assertEquals("01L", checker.check("foo", "01L").isLong())
+        assertEquals("0x1", checker.check("foo", "0x1").isLong())
+        assertEquals("0x1L", checker.check("foo", "0x1L").isLong())
+        assertEquals(null, checker.check("foo", null).isLong())
+        assertTrue(checker.check("foo", 1I).isLong().getClass() == Integer)
+        assertTrue(checker.check("foo", 1.0).isLong().getClass() == BigDecimal)
     }
 
     void testIsBigDecimalPassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isBigDecimal())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isBigDecimal(true))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        checker.allowPassOnNull().isBigDecimal()
+        checker.disallowPassOnNull().isBigDecimal(true)
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0G", true).isBigDecimal()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0G").isBigDecimal(true)
-        }
+        assertFalse(checker.hasFailures())
     }
 
+
     void testIsBigDecimal() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals(1 as BigDecimal, new CoerciveSanityChecker("foo", "1").isBigDecimal())
-        assertEquals(1.0, new CoerciveSanityChecker("foo", 1.0).isBigDecimal())
-        assertEquals(1.0, new CoerciveSanityChecker("foo", "1.0").isBigDecimal())
-        assertEquals(1.0G, new CoerciveSanityChecker("foo", "${1.0}").isBigDecimal())
-        assertEquals(1.0G, new CoerciveSanityChecker("foo", 1.0G).isBigDecimal())
-        assertEquals(1.0G, new CoerciveSanityChecker("foo", "${1.0G}").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 1.0).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 01.0).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 1.0G).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 01.0G).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 1.0 as String).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 01.0 as String).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 1.0G as String).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", 01.0G as String).isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "1.0").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "01.0").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "${1.0}").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "${01.0}").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "${1.0G}").isBigDecimal())
+        assertEquals(1.0, checker.check("foo", "${01.0G}").isBigDecimal())
 
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1G).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0G").isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", Double.MAX_VALUE).isBigDecimal()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "1.0G").isBigDecimal()
-        }
+        assertEquals("1.0G", checker.check("foo", "1.0G").isBigDecimal())
+        assertEquals("01.0G", checker.check("foo", "01.0G").isBigDecimal())
+        assertEquals(null, checker.check("foo", null).isBigDecimal())
+        assertTrue(checker.check("foo", 1G).isBigDecimal().getClass() == BigInteger)
+        assertTrue(checker.check("foo", 1L).isLong().getClass() == Long)
     }
 
     void testIsDoublePassIfNullCases() {
-        assertEquals(null, new CoerciveSanityChecker("foo", null, true).isDouble())
-        assertEquals(null, new CoerciveSanityChecker("foo", null).isDouble(true))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        String fail
+        checker.check("foo", null)
+        checker.allowPassOnNull().isDouble()
+        checker.disallowPassOnNull().isDouble(true)
 
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "apple", true).isDouble()
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", "apple").isDouble(true)
-        }
+        assertFalse(checker.hasFailures())
     }
 
     void testIsDouble() {
 
-        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1").isDouble()))
-        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1}").isDouble()))
-        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", 1D).isDouble()))
-        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1D").isDouble()))
-        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1D}").isDouble()))
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", 1.0D).isDouble()))
-        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1.0D").isDouble()))
-        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1.0D}").isDouble()))
+        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(checker.check("foo", 1D).isDouble()))
+        assertEquals(Double.doubleToLongBits(1D), Double.doubleToLongBits(checker.check("foo", 01D).isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", 1.0D).isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", 01.0D).isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", 1.0D as String).isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", 01.0D as String).isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "1.0").isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "01.0").isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "1.0D").isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "01.0D").isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "${1.0D}").isDouble()))
+        assertEquals(Double.doubleToLongBits(1.0D), Double.doubleToLongBits(checker.check("foo", "${01.0D}").isDouble()))
 
-        assertEquals(Double.doubleToLongBits(1E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", 1E10D).isDouble()))
-        assertEquals(Double.doubleToLongBits(1E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1E10").isDouble()))
-        assertEquals(Double.doubleToLongBits(1E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1E10}").isDouble()))
-        assertEquals(Double.doubleToLongBits(1E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1E10D").isDouble()))
-        assertEquals(Double.doubleToLongBits(1E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1E10D}").isDouble()))
-
-        assertEquals(Double.doubleToLongBits(1.0E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", 1.0E10D).isDouble()))
-        assertEquals(Double.doubleToLongBits(1.0E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "1.0E10D").isDouble()))
-        assertEquals(Double.doubleToLongBits(1.0E10D), Double.doubleToLongBits(new CoerciveSanityChecker("foo", "${1.0E10D}").isDouble()))
-
-        String failure
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", null).isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1).isDouble()
-        }
-
-        failure = shouldFail(SanityCheckException) {
-            new CoerciveSanityChecker("foo", 1.0).isDouble()
-        }
+        assertEquals(null, checker.check("foo", null).isDouble())
+        assertTrue(checker.check("foo", 1.0).isDouble().getClass() == BigDecimal)
+        assertTrue(checker.check("foo", 1L).isLong().getClass() == Long)
     }
 
-    void testCheckFor01() {
-        Integer result
+    void testExactClassMatch() {
 
-        CoerciveSanityChecker checker = CoerciveSanityChecker.checkFor("foo", "20") {
-            result = isInteger()
-        }
+        assertTrue(new StringCoerciveSanityChecker().check("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass))
 
-        assertEquals(20, result)
+        assertFalse(new StringCoerciveSanityChecker().check("foo", null).exactClassMatch(SampleUserClass))
 
-        assertEquals("foo", checker.name)
-        assertEquals("20", checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertFalse(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", "0x1") {
-                isInteger()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", null) {
-                isString()
-                isNotEmpty()
-            }
-        }
+        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).exactClassMatch(SampleUserClass))
     }
 
-    void testCheckFor02() {
-        Integer result
+    void testClassMatchPassIfNullCases() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        CoerciveSanityChecker checker = CoerciveSanityChecker.checkFor("foo", "20", "bar") {
-            result = isInteger()
-        }
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().classMatch(Class))
+        assertTrue(checker.disallowPassOnNull().classMatch(Class, true))
 
-        assertEquals(20, result)
-
-        assertEquals("foo", checker.name)
-        assertEquals("20", checker.entity)
-        assertEquals("bar", checker.classification)
-        assertFalse(checker.allowPassOnNull)
-
-        String fail
-        fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", "0x1", "bar") {
-                isInteger()
-            }
-        }
-
-        fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", null, "bar") {
-                isString()
-                isNotEmpty()
-            }
-        }
+        checker.check("foo", 1)
+        assertFalse(checker.allowPassOnNull().classMatch(String))
+        assertFalse(checker.disallowPassOnNull().classMatch(String, true))
     }
 
-    void testCheckFor03() {
-        Integer result
+    void testClassMatch() {
 
-        CoerciveSanityChecker checker = CoerciveSanityChecker.checkFor("foo", null, true) {
-            result = isInteger()
-        }
+        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).classMatch(Integer))
+        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).classMatch(Number))
+        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).classMatch(String))
 
-        assertEquals(null, result)
-
-        assertEquals("foo", checker.name)
-        assertEquals(null, checker.entity)
-        assertEquals("parameter", checker.classification)
-        assertTrue(checker.allowPassOnNull)
-
-        String fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", null, true) {
-                isNotNull()
-                isNotEmpty()
-            }
-        }
+        assertFalse(new StringCoerciveSanityChecker().check("foo", null).classMatch(Integer))
     }
 
-    void testCheckFor04() {
-        Integer result
+    void testRespondsToPassIfNullCases() {
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
 
-        CoerciveSanityChecker checker = CoerciveSanityChecker.checkFor("foo", null, "bar", true) {
-            result = isInteger()
+        checker.check("foo", null)
+        assertTrue(checker.allowPassOnNull().respondsTo('foo'))
+        assertTrue(checker.disallowPassOnNull().respondsTo('foo', true))
+
+        checker.check("foo", UUID.randomUUID())
+        assertFalse(checker.allowPassOnNull().respondsTo('isEmpty'))
+        assertFalse(checker.disallowPassOnNull().respondsTo('isEmpty', true))
+    }
+
+    void testRespondsTo() {
+
+        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).respondsTo('byteValue'))
+        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).respondsTo('isEmpty'))
+
+        assertFalse(new StringCoerciveSanityChecker().check("foo", null).respondsTo('isEmpty'))
+    }
+
+    void testRunChecks() {
+        Map normalizedInput = [
+            name: "",
+            age: "42",
+            height: '172.72',
+            heightMetric: 'cm',
+            maxLong: Long.MAX_VALUE as String
+        ]
+
+        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
+
+        assertFalse(checker.hasPasses())
+        assertFalse(checker.hasFailures())
+
+        assertEquals(0, checker.countPasses())
+        assertEquals(0, checker.countFailures())
+
+        normalizedInput.with {
+            checker.runChecks {
+
+                check('name', name)
+
+                // Implicit isNotNull
+                name = isString()
+
+                // Implicit isNotNull
+                // Implicit respondsTo
+                isNotEmpty()
+
+                check('age', age)
+
+                // Implicit isNotNull
+                age = isInteger()
+
+                check('height', height)
+
+                // Implicit isNotNull
+                height = isDouble()
+
+                check('maxLong', maxLong)
+
+                // Implicit isNotNull
+                maxLong = isInteger()
+            }
         }
 
-        assertEquals(null, result)
+        assertTrue(checker.hasPasses())
+        assertTrue(checker.hasFailures())
 
-        assertEquals("foo", checker.name)
-        assertEquals(null, checker.entity)
-        assertEquals("bar", checker.classification)
-        assertTrue(checker.allowPassOnNull)
+        assertEquals(10, checker.countPasses())
+        assertEquals(3, checker.countFailures())
 
-        String fail = shouldFail(SanityCheckException) {
-            CoerciveSanityChecker.checkFor("foo", null, "bar", true) {
-                isNotNull()
-                isNotEmpty()
-            }
+        assertEquals("", normalizedInput.name)
+        assertEquals(42, normalizedInput.age)
+
+        assertTrue(normalizedInput.height.getClass() == Double)
+
+        assertEquals(Long.MAX_VALUE as String, normalizedInput.maxLong)
+        assertTrue(normalizedInput.maxLong.getClass() == String)
+    }
+
+    void testCheckYourselfBeforeYouWreckYourself() {
+        def fail
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isNotNull()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isNotEmpty()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isNotEmpty(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isString()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isString(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isInteger()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isInteger(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isLong()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isLong(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isBigDecimal()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isBigDecimal(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isDouble()
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().isDouble(false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().respondsTo('foo')
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().respondsTo('foo', false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().exactClassMatch(String)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().exactClassMatch(String, false)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().classMatch(Number)
+        }
+
+        fail = shouldFail(IllegalStateException) {
+            new StringCoerciveSanityChecker().classMatch(Number, false)
         }
     }
 }
