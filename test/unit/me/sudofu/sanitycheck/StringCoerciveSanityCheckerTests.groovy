@@ -402,56 +402,6 @@ class StringCoerciveSanityCheckerTests {
         assertTrue(checker.check("foo", 1L).isLong().getClass() == Long)
     }
 
-    void testExactClassMatch() {
-
-        assertTrue(new StringCoerciveSanityChecker().check("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass))
-
-        assertFalse(new StringCoerciveSanityChecker().check("foo", null).exactClassMatch(SampleUserClass))
-
-        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).exactClassMatch(SampleUserClass))
-    }
-
-    void testClassMatchPassIfNullCases() {
-        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
-
-        checker.check("foo", null)
-        assertTrue(checker.allowPassOnNull().classMatch(Class))
-        assertTrue(checker.disallowPassOnNull().classMatch(Class, true))
-
-        checker.check("foo", 1)
-        assertFalse(checker.allowPassOnNull().classMatch(String))
-        assertFalse(checker.disallowPassOnNull().classMatch(String, true))
-    }
-
-    void testClassMatch() {
-
-        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).classMatch(Integer))
-        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).classMatch(Number))
-        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).classMatch(String))
-
-        assertFalse(new StringCoerciveSanityChecker().check("foo", null).classMatch(Integer))
-    }
-
-    void testRespondsToPassIfNullCases() {
-        StringCoerciveSanityChecker checker = new StringCoerciveSanityChecker()
-
-        checker.check("foo", null)
-        assertTrue(checker.allowPassOnNull().respondsTo('foo'))
-        assertTrue(checker.disallowPassOnNull().respondsTo('foo', true))
-
-        checker.check("foo", UUID.randomUUID())
-        assertFalse(checker.allowPassOnNull().respondsTo('isEmpty'))
-        assertFalse(checker.disallowPassOnNull().respondsTo('isEmpty', true))
-    }
-
-    void testRespondsTo() {
-
-        assertTrue(new StringCoerciveSanityChecker().check("foo", 1).respondsTo('byteValue'))
-        assertFalse(new StringCoerciveSanityChecker().check("foo", 1).respondsTo('isEmpty'))
-
-        assertFalse(new StringCoerciveSanityChecker().check("foo", null).respondsTo('isEmpty'))
-    }
-
     void testRunChecks() {
         Map normalizedInput = [
             name: "",
@@ -472,29 +422,21 @@ class StringCoerciveSanityCheckerTests {
         normalizedInput.with {
             checker.runChecks {
 
-                check('name', name)
-
                 // Implicit isNotNull
-                name = isString()
+                name = check('name', name).isString()
 
                 // Implicit isNotNull
                 // Implicit respondsTo
                 isNotEmpty()
 
-                check('age', age)
+                // Implicit isNotNull
+                age = check('age', age).isInteger()
 
                 // Implicit isNotNull
-                age = isInteger()
-
-                check('height', height)
+                height = check('height', height).isDouble()
 
                 // Implicit isNotNull
-                height = isDouble()
-
-                check('maxLong', maxLong)
-
-                // Implicit isNotNull
-                maxLong = isInteger()
+                maxLong = check('maxLong', maxLong).isInteger()
             }
         }
 

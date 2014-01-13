@@ -101,8 +101,14 @@ class SanityCheckerTests {
         assertEquals("bar", checker.entity)
         assertEquals("baz", checker.classification)
 
-        def fail = shouldFail(IllegalArgumentException) {
+        def fail
+
+        fail = shouldFail(IllegalArgumentException) {
             checker.check(null, "bar")
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            checker.check(null, "")
         }
     }
 
@@ -237,6 +243,16 @@ class SanityCheckerTests {
         assertFalse(new SanityChecker().check("foo", 1).respondsTo('isEmpty'))
 
         assertFalse(new SanityChecker().check("foo", null).respondsTo('isEmpty'))
+
+        def fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).respondsTo(null)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).respondsTo("")
+        }
     }
 
     void testExactClassMatchPassIfNullCases() {
@@ -258,6 +274,16 @@ class SanityCheckerTests {
         assertFalse(new SanityChecker().check("foo", null).exactClassMatch(SampleUserClass))
 
         assertFalse(new SanityChecker().check("foo", 1).exactClassMatch(SampleUserClass))
+
+        def fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).exactClassMatch(null)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).exactClassMatch(null, true)
+        }
     }
 
     void testClassMatchPassIfNullCases() {
@@ -279,6 +305,16 @@ class SanityCheckerTests {
         assertFalse(new SanityChecker().check("foo", 1).classMatch(String))
 
         assertFalse(new SanityChecker().check("foo", null).classMatch(Integer))
+
+        def fail
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).classMatch(null)
+        }
+
+        fail = shouldFail(IllegalArgumentException) {
+            new SanityChecker().check("foo", null).classMatch(null, true)
+        }
     }
 
     void testRunChecks01() {

@@ -484,68 +484,6 @@ class BasicSanityCheckerTests {
         assertFalse(new BasicSanityChecker().check("foo", []).isMap())
     }
 
-    void testExactClassMatchPassIfNullCases() {
-        BasicSanityChecker checker = new BasicSanityChecker()
-
-        checker.check("foo", null)
-        assertTrue(checker.allowPassOnNull().exactClassMatch(Class))
-        assertTrue(checker.disallowPassOnNull().exactClassMatch(Class, true))
-
-        checker.check("foo", 1)
-        assertFalse(checker.allowPassOnNull().exactClassMatch(String))
-        assertFalse(checker.disallowPassOnNull().exactClassMatch(String, true))
-    }
-
-    void testExactClassMatch() {
-
-        assertTrue(new BasicSanityChecker().check("foo", SampleUserClass.SAMPLE_USER_CLASS).exactClassMatch(SampleUserClass))
-
-        assertFalse(new BasicSanityChecker().check("foo", null).exactClassMatch(SampleUserClass))
-
-        assertFalse(new BasicSanityChecker().check("foo", 1).exactClassMatch(SampleUserClass))
-    }
-
-    void testClassMatchPassIfNullCases() {
-        BasicSanityChecker checker = new BasicSanityChecker()
-
-        checker.check("foo", null)
-        assertTrue(checker.allowPassOnNull().classMatch(Class))
-        assertTrue(checker.disallowPassOnNull().classMatch(Class, true))
-
-        checker.check("foo", 1)
-        assertFalse(checker.allowPassOnNull().classMatch(String))
-        assertFalse(checker.disallowPassOnNull().classMatch(String, true))
-    }
-
-    void testClassMatch() {
-
-        assertTrue(new BasicSanityChecker().check("foo", 1).classMatch(Integer))
-        assertTrue(new BasicSanityChecker().check("foo", 1).classMatch(Number))
-        assertFalse(new BasicSanityChecker().check("foo", 1).classMatch(String))
-
-        assertFalse(new BasicSanityChecker().check("foo", null).classMatch(Integer))
-    }
-
-    void testRespondsToPassIfNullCases() {
-        BasicSanityChecker checker = new BasicSanityChecker()
-
-        checker.check("foo", null)
-        assertTrue(checker.allowPassOnNull().respondsTo('foo'))
-        assertTrue(checker.disallowPassOnNull().respondsTo('foo', true))
-
-        checker.check("foo", UUID.randomUUID())
-        assertFalse(checker.allowPassOnNull().respondsTo('isEmpty'))
-        assertFalse(checker.disallowPassOnNull().respondsTo('isEmpty', true))
-    }
-
-    void testRespondsTo() {
-
-        assertTrue(new BasicSanityChecker().check("foo", 1).respondsTo('byteValue'))
-        assertFalse(new BasicSanityChecker().check("foo", 1).respondsTo('isEmpty'))
-
-        assertFalse(new BasicSanityChecker().check("foo", null).respondsTo('isEmpty'))
-    }
-
     void testRunChecks01() {
         BasicSanityChecker checker = new BasicSanityChecker()
 
