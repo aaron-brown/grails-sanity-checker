@@ -118,7 +118,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * Run a sanity check to ensure the entity is a
      * <b><code>String</code></b>.
      *
-     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     * <p>Default behavior specified by {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}</p>
      *
      * @return
      *
@@ -140,7 +140,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * @param   allowPassOnNull
      *
      * Explicitly declare or override the behavior of
-     * {@link #allowPassOnNull allowPassOnNull}
+     * {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}
      *
      * @return
      *
@@ -160,7 +160,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * Run a sanity check to ensure the entity is a(n)
      * <b><code>Integer</code></b>.
      *
-     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     * <p>Default behavior specified by {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}</p>
      *
      * @return
      *
@@ -183,7 +183,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * @param   allowPassOnNull
      *
      * Explicitly declare or override the behavior of
-     * {@link #allowPassOnNull allowPassOnNull}
+     * {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}
      *
      * @return
      *
@@ -223,7 +223,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * Run a sanity check to ensure the entity is a(n)
      * <b><code>Long</code></b>.
      *
-     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     * <p>Default behavior specified by {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}</p>
      *
      * @return
      *
@@ -246,7 +246,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * @param   allowPassOnNull
      *
      * Explicitly declare or override the behavior of
-     * {@link #allowPassOnNull allowPassOnNull}
+     * {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}
      *
      * @return
      *
@@ -286,7 +286,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * Run a sanity check to ensure the entity is a(n)
      * <b><code>BigDecimal</code></b>.
      *
-     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     * <p>Default behavior specified by {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}</p>
      *
      * @return
      *
@@ -309,7 +309,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * @param   allowPassOnNull
      *
      * Explicitly declare or override the behavior of
-     * {@link #allowPassOnNull allowPassOnNull}
+     * {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}
      *
      * @return
      *
@@ -349,7 +349,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * Run a sanity check to ensure the entity is a(n)
      * <b><code>Double</code></b>.
      *
-     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     * <p>Default behavior specified by {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}</p>
      *
      * @return
      *
@@ -372,7 +372,7 @@ class StringCoerciveSanityChecker extends SanityChecker {
      * @param   allowPassOnNull
      *
      * Explicitly declare or override the behavior of
-     * {@link #allowPassOnNull allowPassOnNull}
+     * {@link me.sudofu.sanitycheck.SanityChecker#allowPassOnNull allowPassOnNull}
      *
      * @return
      *
