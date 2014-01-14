@@ -1,0 +1,158 @@
+General usage of any Sanity Checker is to run the various checks, and then
+determining if there were any failures. The scope of how to handle failures if
+they are detected falls outside of this guide, as that is dependant on the
+application or circumstances of the failure.
+
+h3. Running Sanity Checks
+
+{note}
+The @BasicSanityChecker@ is used in these examples, as the @SanityChecker@ is
+too limited to adiquately demonstrate usage.
+{note}
+
+The basic methodology for running sanity checks is roughly the following:
+
+    * Instantiate a sanity checker.
+    * Provide the [entity|SanityChecker] to [check|SanityChecker].
+    * [Run the checks|SanityChecker].
+    * [Detect Failures|SanityChecker].
+    * React to results.
+
+The way this appears in code is as follows:
+
+{code}
+import me.sudofu.sanitycheck.BasicSanityChecker
+
+// ...
+
+BasicSanityChecker checker = new BasicSanityChecker()
+
+checker.runChecks {
+    check('a', a, 'parameter').isString()
+
+    check('b', b)
+    isMap()
+    isNotEmpty()
+
+    check('b.age', b.age).isInteger()
+}
+
+if (checker.hasFailures()) {
+    // Respond to failures.
+}
+
+// ...
+{code}
+
+The above shows the closure usage, Notice the repeated use of 
+[check|SanityChecker], which is used to indicate to the sanity checker what
+entity is it checking on.
+
+Note that in the first call to @check@, the classification 'parameter' is
+used. By default, the classification is hard-coded and configured as 'entity';
+it is possible to configure the default value through configuring the
+default [classification|SanityChecker]. Additionaly, this configuration can
+be overridden by parameter as shown here.
+
+{warning}
+For @BasicSanityChecker@ and @StringCoerciveSanityChecker@, and any other
+extensions which are written appropriately, invoking a sanity check prior to
+calling [check|SanityChecker] for the first time will result in an
+@IllegalStateException@.
+
+This does not need to be put in a @try / catch@ clause, as this is to prevent
+developer folly.
+{warning}
+
+{note}
+While the closure-style is recommended, more verbose calling structures are
+possible, but will not be discussed in this guide.
+{note}
+
+h4. Allow Pass on @null@
+
+{warning}
+Sanity checkers outside the ones packaged in this plugin may not be written
+to implement this feature. If writing such a sanity checker, please indicate
+such.
+
+All references to sanity checkers is only confidently referring to sanity
+checkers provided by the plugin.
+{warning}
+
+{note}
+[isNotNull|SanityChecker] inherently does not follow the behavior outlined in
+this section. It will _always_ result in a failure if the entity being checked
+is @null@.
+{note}
+
+Generally speaking, @null@ changes the behavior of sanity checks. All sanity
+checkers are designed to accommodate two methodologies:
+
+    # Check if the entity is @null@, and if so report failure.
+    # Check if the entity is @null@, and if so allow it to pass.
+
+The sanity checkers can be instructed to follow either of these methodologies
+by various means of granularity.
+
+The highest level of granularity is the default. By default, sanity checkers
+are hard-coded and configured to disallow pass on @null@. This default
+configuration can be changed via [allowPassOnNull|SanityChecker].
+
+The next level of granularity is in the @SanityChecker@ constructor. This
+will set the default behavior for that sanity checker.
+
+The next level of granularity is through use of either directly modifying
+[allowPassOnNull|SanityChecker] or invoking the method by the same name or
+[disallowPassOnNull|SanityChecker]. This will alter the behavior over the
+course of a sanity checker's life.
+
+The final level of granularity is via the *allowPassOnNull* parameter at
+every sanity check. This is the finest granularity and only impacts the
+particular sanity check performed.
+
+These levels of granularity provide extremely high flexibility for this
+behavior. Of course, it is best to develop with the mindset of using the
+highest level necessary, to avoid confusing the behavior.
+
+An example use-case for using both methodologies in one sanity checker is to
+check optional parameters. In many cases, optional parameters are allowed to
+be @null@, and therefore it is undesirable to let that interfere with sanity
+checks if they are not present, but abide by sanity checks if they are.
+
+Refer to the following example to see this implemention using Groovy Named
+Parameters. The method first checks the required parameters, assuming that the
+default behavior is set to disallow @null@ to pass, and then allows @null@ to
+pass when checking the optional parameters.
+
+{code}
+public void myMethod(Map options, String a, Date birthday, int... luckyNumbers) {
+    BasicSanityChecker checker = new BasicSanityChecker().runChecks {
+        check('a', a).isNotEmpty()
+
+        check('birthday', myBirthday).isNotNull()
+
+        luckyNumbers.eachWithIndex { index, number ->
+            check("luckyNumber[${index}]", number).isNotNull()
+        }
+
+        allowPassOnNull()
+
+        options.with {
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()
+
+            check('height', myHeight)
+            isDouble()
+
+            check('myEyesAreBlue', myEyesAreBlue)
+            isBoolean()
+        }
+    }
+
+    if (checker.hasFailures) {
+        // Handle the result.
+    }
+}
+{code}

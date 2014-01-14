@@ -1,0 +1,73 @@
+The *StringCoerciveSanityChecker* is designed to perform sanity checks, with
+the added serendipity of coercing @String@ entities where possible.
+
+This sanity checker is intended for general use, especially where inputs are
+not strictly typed, and may be normalized as @String@. For instance, JSON in
+a JAXRS Resource, or with Groovy's Named Parameters.
+
+The *StringCoerciveSanityChecker* handles the [entity|SanityChecker] along with
+determining pass / fail of the check:
+
+    * Run the sanity check.
+    * If the entity is a @String@, and the @String@ is coercible to the type \
+      the sanity check is looking for, return the entity coerced to that type.
+    * Otherwise, return the entity.
+
+The following example demonstrates the usage:
+
+{code}
+import me.sudofu.sanitycheck.SanityChecker
+import me.sudofu.sanitycheck.BasicSanityChecker
+import me.sudofu.sanitycheck.StringCoerciveSanityChecker as SCSanityChecker
+
+public void myMethod(Map options, String a, Date birthday, int... luckyNumbers) {
+    SanityChecker checker = new SCSanityChecker().runChecks {
+        check('a', a).isNotEmpty()
+
+        check('birthday', myBirthday).isNotNull()
+
+        luckyNumbers.eachWithIndex { index, number ->
+            luckyNumbers[index] = check("luckyNumber[${index}]", number).isNotNull()
+        }
+
+        allowPassOnNull()
+
+        options.with {
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()
+
+            myHeight = check('height', myHeight)
+        }
+    }
+
+    if (checker.hasFailures) {
+        // Handle the result.
+    }
+
+    checker = new BasicSanityChecker()
+        .check('myEyesAreBlue', options.myEyesAreBlue)
+        .isBoolean()
+
+    if (checker.hasFailures) {
+        // Handle the result.
+    }
+}
+{code}
+
+Notice that not all sanity checks performed are strictly from 
+@StringCoerciveSanityChecker@. Also note that [isBoolean|BasicSanityChecker] is
+not within @StringCoerciveSanityChecker@, so it has to be checked separately.
+The justification of this is because a @String@ is not very intuitively
+coercible into @Boolean@, since both @"false"@ and @"puppies"@ would both
+resolve to false.
+
+{warning}
+The behavior of @StringCoerciveSanityChecker@ is subject to Groovy's
+string-coersion algorithms. Therefore, a change in Groovy's string-coersion
+algorithms will change the behavior of this sanity checker.
+
+For example, @"15D"@ will successfully pass and be coerced from 
+[isDouble|StringCoerciveSanityChecker], but @"15I"@ will *not* pass nor be
+coerced from [isInteger|StringcoerciveSanityChecker].
+{warning}

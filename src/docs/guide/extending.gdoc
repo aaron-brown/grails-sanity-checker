@@ -1,0 +1,119 @@
+The @SanityChecker@ class was written and designed to be easily extensible.
+Extensions can be made with minimal effort so long as the necessary methods and
+best practices are known and followed.
+
+This section will discuss the methods that come with the @SanityChecker@ that
+are intended to be used when creating an extension.
+
+h2. [checkYourselfBeforeYouWreckYourself|SanityChecker]
+
+This method, while light-hearted, is actually critical. The purpose and
+intention of this method is to be used within any created sanity check to
+ensure that the [check|SanityChecker] method has been invoked prior to the
+first sanity check, as the behavior would be undefined otherwise.
+
+It throws an @IllegalStateException@, and therefore this should be declared
+in the method signature. If including it in the JavaDoc, it is suggested to
+use the clause found in the other sanity checkers that come with this plugin.
+
+Usage:
+
+{code}
+public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateException {
+    checkYourselfBeforeYouWreckYourself()
+
+    // ...
+}
+{code}
+
+h2. [allowPassOnNull|SanityChecker]
+
+@allowPassOnNull@ allows for the behavior of sanity checks to short-stop if
+the entity being checked is null. This allows for flexible behavior, for
+example some sanity checks may apply to optional parameters in which @null@
+may be acceptable.
+
+Therefore, best practice is to provide two forms of a sanity check:
+
+    # Form that does not alter behavior.
+    # Form that allows alteration of behavior.
+
+The plugin enumerates both signatures, but the following form can also be
+used:
+
+{code}
+public boolean mySanityCheck(boolean allowPassOnNull = this.allowPassOnNull) throws IllegalStateException {
+    checkYourselfBeforeYouWreckYourself()
+
+    // ...
+}
+{code}
+
+Plugin example:
+
+{code}
+public boolean mySanityCheck() {
+    mySanityCheck(allowPassOnNull)
+}
+
+public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateException {
+    checkYourselfBeforeYouWreckYourself()
+
+    if (allowPassOnNull && entity == null) {
+        // ...
+        return true
+    }
+
+    // Implicit isNotNull.
+    isNotNull()
+
+    // ...
+}
+{code}
+
+h2. [pass|SanityChecker] / [fail|SanityChecker]
+
+Passing / Failing a sanity check is provided. These methods implement the
+[pass|SanityCheckReport] and [fail|SanityCheckReport] of @SanityCheckReport@.
+
+Since the [entity|SanityChecker] and [classification|SanityChecker] are
+inherent to the @SanityChecker@, only the _check_ and _checkDescription_ are
+required.
+
+The _check_ is usually just the method name, as both are supposed to quickly
+symbolize the sanity check. For example, [isNotNull|SanityCheck] is simply
+@"isNotNull"@
+
+The _checkDescription_ is usually just a succinct sentence that explains the
+intention of the sanity check. This description can also serve as a
+human-readable error message implying what condition the entity did not meet.
+For example, [isNotNull|SanityCheck] states: @"Must not be null"@.
+
+{code}
+public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateException {
+    checkYourselfBeforeYouWreckYourself()
+
+    if (allowPassOnNull && entity == null) {
+        pass("mySanityCheck", "My sanity check condition."
+        return true
+    }
+
+    // Implicit isNotNull.
+    isNotNull()
+
+    if (checkForFailure(myCondition)) {
+        fail("mySanityCheck", "My sanity check condition."
+        return false
+    }
+
+    pass("mySanityCheck", "My sanity check condition."
+    return true
+}
+{code}
+
+Note that the sanity check _does not return if [isNotNull|SanityCheck] fails_.
+The sanity checker methodology is to be as informative as possible. Imagine
+a user experiencing a failure because they passed @null@. This will tell them
+that they cannot pass @null@, and that they also must meet another condition
+that was not met. Otherwise, they might only correct not sending @null@, and
+then get a subsiquent failure.

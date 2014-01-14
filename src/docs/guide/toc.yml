@@ -1,0 +1,10 @@
+introduction:
+    title: Introduction
+    overview: Overview
+    changes: Changelog
+usage:
+    title: Usage
+    general_usage: General Usage
+    basic_sanity_checker: BasicSanityChecker
+    string_coercive_sanity_checker: StringCoerciveSanityChecker
+extending: Extending SanityChecker

@@ -1,0 +1,15 @@
+The *SanityChecker* plugin for Grails provides a simple paradigm and utility
+for running basic sanity checks against parameters, inputs, data, etc.
+
+The goal of the plugin is to make sanity checking of data very intuitive,
+concise, and extensible. Checkers should be simple yet powerful, and easy to
+use without imposing any constraints or take control away from the developer.
+
+This guide is intended to describe usage and best-practices for the plugin.
+There are no configurations necessary.
+
+h3. Resources
+
+# [Grails Plugin Page|http://grails.org/plugins/sanity-checker]
+
+# [Source|http://github.com/aaron-brown/grails-sanity-checker]

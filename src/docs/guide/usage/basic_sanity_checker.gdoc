@@ -1,0 +1,46 @@
+The *BasicSanityChecker* is a very strict sanity checker. It is used when only
+strict datatyping needs to be enforced. It is arguably less useful if an
+application is strictly typed, however it is provided for completeness and
+for giving mnemonics to certain sanity checks that can otherwise be implemented
+manually.
+
+However, due to the nature of some extensions, the simplistic nature of the
+@BasicSanityChecker@ gives it some sanity checks that may not be feasible with
+other extensions.
+
+Much like the root @SanityChecker@ this checker is likely best used as a more
+fleshed-out basis for extension.
+
+Sample:
+
+{code}
+public void myMethod(Map options, String a, Date birthday, int... luckyNumbers) {
+    BasicSanityChecker checker = new BasicSanityChecker().runChecks {
+        check('a', a).isNotEmpty()
+
+        check('birthday', myBirthday).isNotNull()
+
+        luckyNumbers.eachWithIndex { index, number ->
+            check("luckyNumber[${index}]", number).isNotNull()
+        }
+
+        allowPassOnNull()
+
+        options.with {
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()
+
+            check('height', myHeight)
+            isDouble()
+
+            check('myEyesAreBlue', myEyesAreBlue)
+            isBoolean()
+        }
+    }
+
+    if (checker.hasFailures) {
+        // Handle the result.
+    }
+}
+{code}

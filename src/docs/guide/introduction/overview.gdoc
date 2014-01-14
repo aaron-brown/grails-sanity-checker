@@ -1,0 +1,34 @@
+This section will discuss the plugin's structure.
+
+h3. Configuration
+
+There following is the default configuration for the plugin:
+
+{code}
+sanityChecker {
+    defaults {
+        allowPassOnNull = false
+        classification = 'entity'
+    }
+}
+{code}
+
+For more information on these configurations, see:
+
+    * [allowPassOnNull|SanityChecker]
+    * [classification|SanityChecker]
+
+h3. Artifacts
+
+there are no artifacts introduced in this plugin.
+
+h3. Sanity Checkers
+
+The plugin comes pre-packaged with a base-extendable SanityChecker, as well
+as two extensions: BasicSanityChecker and StringCoerciveSanityChecker.
+
+All packaged Sanity Checkers can be found in the following package:
+
+{code}
+me.sudofu.sanitycheck
+{code}
