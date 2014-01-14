@@ -16,6 +16,8 @@ package me.sudofu.sanitycheck
 
 import me.sudofu.sanitycheck.SanityCheckReport
 
+import grails.util.Holders
+
 /**
  * An exentsible utility for performing a variety of basic or advanced
  * sanity checks on input, data, parameters, arguments, etc.
@@ -91,7 +93,7 @@ class SanityChecker {
      * disallowing <code>null</code> to pass sanity checks.
      */
     public SanityChecker() {
-        this(false)
+        this(Holders.config.sanityChecker.defaults.allowPassOnNull ?: false)
     }
 
     /**
@@ -290,7 +292,7 @@ class SanityChecker {
 
         this.name = name ?: entity.getClass().name
         this.entity = entity
-        this.classification = classification ?: 'entity'
+        this.classification = classification ?: Holders.config.sanityChecker.defaults.classification ?: 'entity'
 
         return this
     }
