@@ -61,74 +61,389 @@ class BasicSanityChecker extends SanityChecker {
         super(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Boolean</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isBoolean() throws IllegalStateException {
         isBoolean(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Boolean</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isBoolean(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Boolean, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>String</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isString() throws IllegalStateException {
         isString(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>String</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isString(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(String, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Number</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isNumber() throws IllegalStateException {
         isNumber(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Number</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isNumber(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(Number, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Integer</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isInteger() throws IllegalStateException {
         isInteger(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Integer</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isInteger(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Integer, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Long</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isLong() throws IllegalStateException {
         isLong(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Long</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isLong(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Long, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>BigDecimal</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isBigDecimal() throws IllegalStateException {
         isBigDecimal(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>BigDecimal</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isBigDecimal(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(BigDecimal, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Double</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isDouble() throws IllegalStateException {
         isDouble(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Double</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isDouble(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(Double, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>List</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isList() throws IllegalStateException {
         isList(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>List</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isList(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(List, allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Map</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isMap() throws IllegalStateException {
         isMap(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Map</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * <code>true</code> if the test passes, <code>false</code>
+     * otherwise.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public boolean isMap(boolean allowPassOnNull) throws IllegalStateException {
         classMatch(Map, allowPassOnNull)
     }
