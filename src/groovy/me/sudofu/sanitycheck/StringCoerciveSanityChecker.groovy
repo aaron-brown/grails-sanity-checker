@@ -114,19 +114,87 @@ class StringCoerciveSanityChecker extends SanityChecker {
         super(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a
+     * <b><code>String</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * The entity that was passed checked.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isString() throws IllegalStateException {
         isString(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>boolean</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * The entity that was passed checked.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isString(boolean allowPassOnNull) throws IllegalStateException {
         exactClassMatch(String, allowPassOnNull)
         return entity
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Integer</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Integer</code>, then the <code>Integer</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isInteger() throws IllegalStateException {
         return isInteger(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Integer</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Integer</code>, then the <code>Integer</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isInteger(boolean allowPassOnNull) throws IllegalStateException {
         checkYourselfBeforeYouWreckYourself()
 
@@ -151,10 +219,45 @@ class StringCoerciveSanityChecker extends SanityChecker {
         return entity
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Long</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Long</code>, then the <code>Long</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isLong() throws IllegalStateException {
         isLong(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Long</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Long</code>, then the <code>Long</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isLong(boolean allowPassOnNull) throws IllegalStateException {
         checkYourselfBeforeYouWreckYourself()
 
@@ -179,10 +282,45 @@ class StringCoerciveSanityChecker extends SanityChecker {
         return entity
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>BigDecimal</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>BigDecimal</code>, then the <code>BigDecimal</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isBigDecimal() throws IllegalStateException {
         isBigDecimal(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>BigDecimal</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>BigDecimal</code>, then the <code>BigDecimal</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isBigDecimal(boolean allowPassOnNull) throws IllegalStateException {
         checkYourselfBeforeYouWreckYourself()
 
@@ -207,10 +345,45 @@ class StringCoerciveSanityChecker extends SanityChecker {
         return entity
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Double</code></b>.
+     *
+     * <p>Default behavior specified by {@link #allowPassOnNull allowPassOnNull}</p>
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Double</code>, then the <code>Double</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isDouble() throws IllegalStateException {
         isDouble(allowPassOnNull)
     }
 
+    /**
+     * Run a sanity check to ensure the entity is a(n)
+     * <b><code>Double</code></b>.
+     *
+     * @param   allowPassOnNull
+     *
+     * Explicitly declare or override the behavior of
+     * {@link #allowPassOnNull allowPassOnNull}
+     *
+     * @return
+     *
+     * The entity that was checked; or, if a <code>String</code> and
+     * coercible to <code>Double</code>, then the <code>Double</code>.
+     *
+     * @throws  IllegalStateException
+     *
+     * An entity must be declared via a <b><code>check()</code></b>
+     * invokation before any sanity checks can be performed.
+     */
     public Object isDouble(boolean allowPassOnNull) throws IllegalStateException {
         checkYourselfBeforeYouWreckYourself()
 
@@ -235,6 +408,14 @@ class StringCoerciveSanityChecker extends SanityChecker {
         return entity
     }
 
+    /**
+     * Detect coercible entities.
+     *
+     * @return
+     *
+     * <code>true</code> if the entity is coercible, <code>false</code>
+     * otherwise.
+     */
     protected boolean entityIsCoercible() {
         return [String, GStringImpl].any { entity in it }
     }
