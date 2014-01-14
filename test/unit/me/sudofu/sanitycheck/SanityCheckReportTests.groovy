@@ -110,4 +110,16 @@ class SanityCheckReportTests {
         assertEquals('bar', entry.check)
         assertEquals('baz', entry.checkDescription)
     }
+
+    void testResults() {
+        SanityCheckReport report = new SanityCheckReport()
+
+        report.pass('foo', 'param', 'bar', 'baz')
+        report.fail('foo', 'param', 'bar', 'baz')
+
+        assertEquals(2, report.countResults())
+
+        assertTrue(report.results.any { it == report.passes[0] })
+        assertTrue(report.results.any { it == report.failures[0] })
+    }
 }

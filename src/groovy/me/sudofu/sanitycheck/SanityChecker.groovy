@@ -356,6 +356,23 @@ class SanityChecker {
     }
 
     /**
+     * Count the number of results recorded.
+     *
+     * <p>
+     * Note that this is an unpredictable number, as many sanity
+     * checks run implicit checks such <code>isNotNull</code>.
+     * </p>
+     *
+     * @return
+     *
+     * The number of results recorded, or <code>0</code> (zero) if no
+     * checks have been run.
+     */
+    public int countResults() {
+        return report.countResults()
+    }
+
+    /**
      * Count the number of sanity check passes.
      *
      * <p>
@@ -393,6 +410,48 @@ class SanityChecker {
      */
     public int countFailures() {
         return report.countFailures()
+    }
+
+    /**
+     * Retrieve all results of the sanity checks run.
+     *
+     * <p>
+     * <table>
+     *  <tr>
+     *   <th>Key</th>
+     *   <th>Description</th>
+     *  </tr>
+     *  <tr>
+     *   <td>result</td>
+     *   <td>Whether or not the check passed or failed.</td>
+     *  </tr>
+     *  <tr>
+     *   <td>name</td>
+     *   <td>The name of the entity checked against.</td>
+     *  </tr>
+     *  <tr>
+     *   <td>classification</td>
+     *   <td>The classification of the entity checked against.</td>
+     *  </tr>
+     *  <tr>
+     *   <td>check</td>
+     *   <td>A symbol / name of the check performed on the entity.</td>
+     *  </tr>
+     *  <tr>
+     *   <td>checkDescription</td>
+     *   <td>A succinct description or intended purpose of the check.</td>
+     *  </tr>
+     * </table>
+     * </p>
+     *
+     * @return
+     *
+     * A <code>List</code> of the results of the checks that have been
+     * run, described in <code>Map</code>s; an empty <code>List</code>
+     * if no checks were performed.
+     */
+    public List<Map> getResults() {
+        return report.results
     }
 
     /**
