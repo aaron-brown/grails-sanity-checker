@@ -481,6 +481,8 @@ class SanityChecker {
      * Use before sanity checks to ensure that a <code>check</code>
      * method was invoked.
      *
+     * <p>Because if you don't, you'll go insane in the membrane.</p>
+     *
      * @throws  IllegalStateException
      *
      * Thrown if it has been detected that neither
