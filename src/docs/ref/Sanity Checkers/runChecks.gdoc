@@ -1,0 +1,22 @@
+h3. Purpose
+
+To provide Closure-style sanity checking syntax.
+
+h3. Example
+
+{code}
+SanityChecker checker = new SanityChecker()
+
+checker.runChecks {
+    check('Item 1', 1)
+    isInteger()
+
+    check('Item 2', 2, 'Sample Input')
+    isInteger()
+
+    allowPassOnNull()
+
+    check('Item 3', null, 'Null-pass example.')
+    isInteger()
+}
+{code}

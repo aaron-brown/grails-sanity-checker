@@ -1,0 +1,21 @@
+h3. Purpose
+
+Check that the entity is either _exactly_ identified as a particular @Class@,
+_or_ extends a particular @Class@.
+
+h3. Implicit Checks
+
+    * [isNotNull|Sanity Checks]
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | Y
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | Y
+{table}
+
+h3. Can Be Confused With
+
+    * [exactClassMatch|Sanity Checks]

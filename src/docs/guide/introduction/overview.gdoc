@@ -13,11 +13,6 @@ sanityChecker {
 }
 {code}
 
-For more information on these configurations, see:
-
-    * [allowPassOnNull|SanityChecker]
-    * [classification|SanityChecker]
-
 h3. Artifacts
 
 there are no artifacts introduced in this plugin.

@@ -1,0 +1,67 @@
+h3. Purpose
+
+Overview of methods provided to more easily extend @SanityChecker@.
+
+h3. @checkYourselfBeforeYouWreckYourself@
+
+A method which should be used within each sanity check to ensure the
+[check|Sanity Checkers] method has been invoked prior to the first sanity
+check.
+
+{note}
+Throws @IllegalStateException@.
+{note}
+
+h3. @pass@
+
+Indicate that the current entity has passed a sanity check.
+
+h3. @fail@
+
+Indicate that the current entity has failed a sanity check.
+
+h3. Example
+
+{code}
+public boolean mySanityCheck() {
+    mySanityCheck(allowPassOnNull)
+}
+
+public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateException {
+    checkYourselfBeforeYouWreckYourself()
+
+    if (allowPassOnNull && entity == null) {
+        pass("mySanityCheck", "My sanity check condition."
+        return true
+    }
+
+    // Implicit isNotNull.
+    isNotNull()
+
+    if (checkForFailure(myCondition)) {
+        fail("mySanityCheck", "My sanity check condition."
+        return false
+    }
+
+    pass("mySanityCheck", "My sanity check condition."
+    return true
+}
+{code}
+
+h3. Description
+
+The above methods will throw an @IllegalStateException@ if 
+[check|Sanity Checkers] has not been invoked prior to calling this sanity
+check.
+
+The stub method above ensures that the sanity checker's @allowPassOnNull@
+behavior is taken into account.
+
+The method short-circuits a @pass@ if the entity is @null@ and 
+@allowPassOnNull@ is @true@.
+
+If @allowPassOnNull@ is @false@, then the method implicitly checks if the
+entity [isNotNull|Sanity Checks].
+
+Whether or not it passes this check, it will go on to perform the actual
+check.

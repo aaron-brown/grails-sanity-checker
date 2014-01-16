@@ -1,0 +1,17 @@
+h3. Purpose
+
+Check that the entity, if able to invoke @isEmpty@, is not empty.
+
+h3. Implicit Checks
+
+    * [isNotNull|Sanity Checks]
+    * [respondsTo|Sanity Checks]
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | Y
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | Y
+{table}

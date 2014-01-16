@@ -1,0 +1,18 @@
+h3. Purpose
+
+Check that the entity is not @null@
+
+{note}
+@isNotNull@ _is not_ influenced by @allowPassOnNull@.
+
+If the *entity* is @null@, this check _will fail_.
+{note}
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | Y
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | Y
+{table}

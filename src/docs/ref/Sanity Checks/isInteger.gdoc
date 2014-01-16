@@ -1,0 +1,20 @@
+h3. Purpose
+
+Check that the entity is a(n) @Integer@
+
+h3. Implicit Checks
+
+    * [isNotNull|Sanity Checks]
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | N
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | Y
+{table}
+
+{note}
+@StringCoerciveSanityChecker@ will also attempt to coerce @String@.
+{note}

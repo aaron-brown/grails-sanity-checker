@@ -5,8 +5,8 @@ This sanity checker is intended for general use, especially where inputs are
 not strictly typed, and may be normalized as @String@. For instance, JSON in
 a JAXRS Resource, or with Groovy's Named Parameters.
 
-The *StringCoerciveSanityChecker* handles the [entity|SanityChecker] along with
-determining pass / fail of the check:
+The *StringCoerciveSanityChecker* handles the @entity@ along with determining 
+pass / fail of the check:
 
     * Run the sanity check.
     * If the entity is a @String@, and the @String@ is coercible to the type \
@@ -56,7 +56,7 @@ public void myMethod(Map options, String a, Date birthday, int... luckyNumbers) 
 {code}
 
 Notice that not all sanity checks performed are strictly from 
-@StringCoerciveSanityChecker@. Also note that [isBoolean|BasicSanityChecker] is
+@StringCoerciveSanityChecker@. Also note that [isBoolean|Sanity Checks] is
 not within @StringCoerciveSanityChecker@, so it has to be checked separately.
 The justification of this is because a @String@ is not very intuitively
 coercible into @Boolean@, since both @"false"@ and @"puppies"@ would both
@@ -68,6 +68,6 @@ string-coersion algorithms. Therefore, a change in Groovy's string-coersion
 algorithms will change the behavior of this sanity checker.
 
 For example, @"15D"@ will successfully pass and be coerced from 
-[isDouble|StringCoerciveSanityChecker], but @"15I"@ will *not* pass nor be
-coerced from [isInteger|StringcoerciveSanityChecker].
+[isDouble|Sanity Checks], but @"15I"@ will *not* pass nor be
+coerced from [isInteger|Sanity Checks].
 {warning}

@@ -1,0 +1,16 @@
+h3. Purpose
+
+Check that the entity is able to respond to a particular method.
+
+h3. Implicit Checks
+
+    * [isNotNull|Sanity Checks]
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | Y
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | Y
+{table}

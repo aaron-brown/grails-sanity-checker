@@ -5,11 +5,11 @@ best practices are known and followed.
 This section will discuss the methods that come with the @SanityChecker@ that
 are intended to be used when creating an extension.
 
-h2. [checkYourselfBeforeYouWreckYourself|SanityChecker]
+h2. @checkYourselfBeforeYouWreckYourself@
 
 This method, while light-hearted, is actually critical. The purpose and
 intention of this method is to be used within any created sanity check to
-ensure that the [check|SanityChecker] method has been invoked prior to the
+ensure that the [check|Sanity Checkers] method has been invoked prior to the
 first sanity check, as the behavior would be undefined otherwise.
 
 It throws an @IllegalStateException@, and therefore this should be declared
@@ -26,7 +26,7 @@ public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateExcepti
 }
 {code}
 
-h2. [allowPassOnNull|SanityChecker]
+h2. @allowPassOnNull@
 
 @allowPassOnNull@ allows for the behavior of sanity checks to short-stop if
 the entity being checked is null. This allows for flexible behavior, for
@@ -71,25 +71,28 @@ public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateExcepti
 }
 {code}
 
-h2. [pass|SanityChecker] / [fail|SanityChecker]
+h2. @pass@ / @fail@
 
 Passing / Failing a sanity check is provided. These methods implement the
-[pass|SanityCheckReport] and [fail|SanityCheckReport] of @SanityCheckReport@.
+@pass@ and @fail@ of @SanityCheckReport@.
 
-Since the [entity|SanityChecker] and [classification|SanityChecker] are
-inherent to the @SanityChecker@, only the _check_ and _checkDescription_ are
-required.
+Since the _entity_ and _classification_ are inherent to the sanity checker, 
+only the _check_ and _checkDescription_ are required.
 
 The _check_ is usually just the method name, as both are supposed to quickly
-symbolize the sanity check. For example, [isNotNull|SanityCheck] is simply
+symbolize the sanity check. For example, [isNotNull|Sanity Checks] is simply
 @"isNotNull"@
 
 The _checkDescription_ is usually just a succinct sentence that explains the
 intention of the sanity check. This description can also serve as a
 human-readable error message implying what condition the entity did not meet.
-For example, [isNotNull|SanityCheck] states: @"Must not be null"@.
+For example, [isNotNull|Sanity Checks] states: @"Must not be null"@.
 
 {code}
+public boolean mySanityCheck() {
+    mySanityCheck(allowPassOnNull)
+}
+
 public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateException {
     checkYourselfBeforeYouWreckYourself()
 
@@ -111,9 +114,9 @@ public boolean mySanityCheck(boolean allowPassOnNull) throws IllegalStateExcepti
 }
 {code}
 
-Note that the sanity check _does not return if [isNotNull|SanityCheck] fails_.
-The sanity checker methodology is to be as informative as possible. Imagine
-a user experiencing a failure because they passed @null@. This will tell them
-that they cannot pass @null@, and that they also must meet another condition
-that was not met. Otherwise, they might only correct not sending @null@, and
-then get a subsiquent failure.
+Note that the sanity check _does not return if [isNotNull|Sanity Checks] 
+fails_. The sanity checker methodology is to be as informative as possible. 
+Imagine a user experiencing a failure because they passed @null@. This will 
+tell them that they cannot pass @null@, and that they also must meet another 
+condition that was not met. Otherwise, they might only correct not sending 
+@null@, and then get a subsiquent failure.

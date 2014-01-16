@@ -1,0 +1,16 @@
+h3. Purpose
+
+Check that the entity is a(n), or extension of, @Map@
+
+h3. Implicit Checks
+
+    * [isNotNull|Sanity Checks]
+
+h3. Compatability Chart
+
+{table}
+Sanity Checker | Compatible
+*SanityChecker* | N
+*BasicSanityChecker* | Y
+*StringCoerciveSanityChecker* | N
+{table}

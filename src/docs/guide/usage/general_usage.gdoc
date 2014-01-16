@@ -13,9 +13,9 @@ too limited to adiquately demonstrate usage.
 The basic methodology for running sanity checks is roughly the following:
 
     * Instantiate a sanity checker.
-    * Provide the [entity|SanityChecker] to [check|SanityChecker].
-    * [Run the checks|SanityChecker].
-    * [Detect Failures|SanityChecker].
+    * Provide the @entity@ to [check|Sanity Checkers].
+    * Run the checks ([runChecks|Sanity Checkers]).
+    * Detect Failures.
     * React to results.
 
 The way this appears in code is as follows:
@@ -45,19 +45,19 @@ if (checker.hasFailures()) {
 {code}
 
 The above shows the closure usage, Notice the repeated use of 
-[check|SanityChecker], which is used to indicate to the sanity checker what
-entity is it checking on.
+[check|Sanity Checkers], which is used to indicate to the sanity checker 
+what entity is it checking on.
 
 Note that in the first call to @check@, the classification 'parameter' is
 used. By default, the classification is hard-coded and configured as 'entity';
 it is possible to configure the default value through configuring the
-default [classification|SanityChecker]. Additionaly, this configuration can
-be overridden by parameter as shown here.
+default @classification@. Additionaly, this configuration can be overridden by 
+parameter as shown here.
 
 {warning}
 For @BasicSanityChecker@ and @StringCoerciveSanityChecker@, and any other
 extensions which are written appropriately, invoking a sanity check prior to
-calling [check|SanityChecker] for the first time will result in an
+calling [check|Sanity Checkers] for the first time will result in an
 @IllegalStateException@.
 
 This does not need to be put in a @try / catch@ clause, as this is to prevent
@@ -81,9 +81,9 @@ checkers provided by the plugin.
 {warning}
 
 {note}
-[isNotNull|SanityChecker] inherently does not follow the behavior outlined in
-this section. It will _always_ result in a failure if the entity being checked
-is @null@.
+[isNotNull|Sanity Checks] inherently does not follow the behavior outlined 
+in this section. It will _always_ result in a failure if the entity being 
+checked is @null@.
 {note}
 
 Generally speaking, @null@ changes the behavior of sanity checks. All sanity
@@ -97,15 +97,14 @@ by various means of granularity.
 
 The highest level of granularity is the default. By default, sanity checkers
 are hard-coded and configured to disallow pass on @null@. This default
-configuration can be changed via [allowPassOnNull|SanityChecker].
+configuration can be changed via @allowPassOnNull@.
 
 The next level of granularity is in the @SanityChecker@ constructor. This
 will set the default behavior for that sanity checker.
 
 The next level of granularity is through use of either directly modifying
-[allowPassOnNull|SanityChecker] or invoking the method by the same name or
-[disallowPassOnNull|SanityChecker]. This will alter the behavior over the
-course of a sanity checker's life.
+@allowPassOnNull@, or invoking @allowPassOnNull()@ / @disallowPassOnNull()@. 
+This will alter the behavior over the course of a sanity checker's life.
 
 The final level of granularity is via the *allowPassOnNull* parameter at
 every sanity check. This is the finest granularity and only impacts the

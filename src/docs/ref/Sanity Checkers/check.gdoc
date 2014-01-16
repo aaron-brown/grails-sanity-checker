@@ -1,0 +1,17 @@
+h3. Purpose
+
+To give the sanity checker an entity to perform checks upon.
+
+h3. Example
+
+{code}
+SanityChecker checker = new SanityChecker()
+
+checker.check('Item 1', 1)
+checker.check('Item 2', 2, 'Sample Input')
+{code}
+
+h3. @IllegalArgumentException@
+
+@check@ throws an @IllegalArgumentException@ if the *name* parameter is
+@null@ or an empty @String@ ("").

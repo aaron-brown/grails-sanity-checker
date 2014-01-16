@@ -1,0 +1,95 @@
+h3. @name@
+
+{note}
+This field cannot be overridden via *setter*.
+{note}
+
+h4. Description
+
+The name by which the *entity* is identified. For example, the variable name
+of a parameter being checked, or the key in a @Map@.
+
+h4. Instantiating
+
+The name is instantiated, along with the *entity* which it identifies, 
+and possibly its *classification*, via the [check|Sanity Checkers] method.
+
+h3. @entity@
+
+{note}
+This field cannot be overridden via *setter*.
+{note}
+
+h4. Description
+
+Contains the value of that which is being sanity checked.
+
+h4. Instantiating
+
+The entity is instantiated, along with the *name* by which it is identified, 
+and possibly its *classification*, via the [check|Sanity Checkers] method.
+
+h3. @classification@
+
+{note}
+This field cannot be overridden via *setter*.
+{note}
+
+h4. Description
+
+A classifier used to describe what the entity is. For example, it may be a
+parameter, or an entry in a @Map@.
+
+h4. Instantiating
+
+The classification is optionally instantiated with the *name* and *entity* that
+it classifies in the [check|Sanity Checkers] method.
+
+h4. Configuration
+
+The default @classification@ can be configured in the 
+@grails-app/conf/Config.groovy@ file:
+
+{code}
+sanityChecker.defaults.classification = 'entity'
+{code}
+
+h3. @allowPassOnNull@
+
+h4. Purpose
+
+@Boolean@ that indicates whether or not the behavior of the 
+@SanityChecker@ is to allow @null@ entities to pass sanity checks.
+
+h4. Settings
+
+{table}
+*Setting*|*Behavior*
+@true@ | @null@ entities will pass sanity checks.
+@false@| @null@ entities will fail the [isNotNull|Sanity Checks] sanity check.
+{table}
+
+h3. Granularities
+
+The @allowPassOnNull@ behavior can be overridden at various levels. The
+following list indicates the level of granularity, with successive entries
+overriding the entries above:
+
+    # Hard-coded (@false@)
+    # Configured (@Config.groovy@)
+    # Instantiated (Constructor)
+    # Ad-Hoc Flipped (Field)
+    # Sanity Check Flipped (Method Parameter)
+
+h4. Configuration
+
+The default @allowPassOnNull@ behavior can be configured in the 
+@grails-app/conf/Config.groovy@ file:
+
+{code}
+sanityChecker.defaults.allowPassOnNull = false
+{code}
+
+This behavior is the same as if calling the Constructor and passing that value
+as the @allowPassOnNull@ parameter. Actually passing that parameter will
+override the configuration for that particular sanity checker.
