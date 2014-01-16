@@ -17,7 +17,7 @@ class SanityCheckerGrailsPlugin {
 Utility for performing various Sanity Checks on arbitrary object data, \
 providing a uniform set of responses for check failures.'''
 
-    def documentation = "http://aaron-brown.github.io/grails-sanity-checker/docs/manual/index.html"
+    def documentation = "http://aaron-brown.github.io/grails-sanity-checker/docs/manual/latest/index.html"
     def license = "APACHE"
     def issueManagement = [ system: "GITHUB", url: "https://github.com/aaron-brown/grails-sanity-checker/issues" ]
     def scm = [ url: "https://github.com/aaron-brown/grails-sanity-checker" ]
