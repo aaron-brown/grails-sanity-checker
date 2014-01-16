@@ -39,7 +39,7 @@ public void myMethod(Map options, String a, Date birthday, int... luckyNumbers) 
         }
     }
 
-    if (checker.hasFailures) {
+    if (checker.hasFailures()) {
         // Handle the result.
     }
 }
