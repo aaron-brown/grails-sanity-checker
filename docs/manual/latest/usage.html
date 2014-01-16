@@ -1,0 +1,352 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2 Usage 0.0.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/usage.html"><strong>2</strong><span>Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/extending.html"><strong>3</strong><span>Extending SanityChecker</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Utility for performing various Sanity Checks on arbitrary object data, providing a uniform set of responses for check failures.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/extending.html"><strong>3</strong><span>Extending SanityChecker</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Usage - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Aaron Brown</p>
+
+                    <p><strong>Version:</strong> 0.0.1</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#general_usage"><strong>2.1</strong><span>General Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#basic_sanity_checker"><strong>2.2</strong><span>BasicSanityChecker</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#string_coercive_sanity_checker"><strong>2.3</strong><span>StringCoerciveSanityChecker</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="usage">2 Usage</h1>
+This section will describe general usage of Sanity Checkers, as well as usage
+of the packaged extensions that come with the plugin.
+
+
+
+<h2 id="general_usage">2.1 General Usage</h2>
+General usage of any Sanity Checker is to run the various checks, and then
+determining if there were any failures. The scope of how to handle failures if
+they are detected falls outside of this guide, as that is dependant on the
+application or circumstances of the failure.<p class="paragraph"/><h3>Running Sanity Checks</h3><p class="paragraph"/><blockquote class="note">
+The <code>BasicSanityChecker</code> is used in these examples, as the <code>SanityChecker</code> is
+too limited to adiquately demonstrate usage.
+</blockquote><p class="paragraph"/>The basic methodology for running sanity checks is roughly the following:
+<ul class="star">
+<li>Instantiate a sanity checker.</li>
+<li>Provide the <code>entity</code> to <a href="../ref/Sanity Checkers/check.html" class="Sanity Checkers">check</a>.</li>
+<li>Run the checks (<a href="../ref/Sanity Checkers/runChecks.html" class="Sanity Checkers">runChecks</a>).</li>
+<li>Detect Failures.</li>
+<li>React to results.</li>
+</ul><p class="paragraph"/>The way this appears in code is as follows:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> me.sudofu.sanitycheck.BasicSanityChecker<p class="paragraph"/>// ...<p class="paragraph"/>BasicSanityChecker checker = <span class="java&#45;keyword">new</span> BasicSanityChecker()<p class="paragraph"/>checker.runChecks &#123;
+    check('a', a, 'parameter').isString()<p class="paragraph"/>    check('b', b)
+    isMap()
+    isNotEmpty()<p class="paragraph"/>    check('b.age', b.age).isInteger()
+&#125;<p class="paragraph"/><span class="java&#45;keyword">if</span> (checker.hasFailures()) &#123;
+    // Respond to failures.
+&#125;<p class="paragraph"/>// ...</pre></div><p class="paragraph"/>The above shows the closure usage, Notice the repeated use of 
+<a href="../ref/Sanity Checkers/check.html" class="Sanity Checkers">check</a>, which is used to indicate to the sanity checker 
+what entity is it checking on.<p class="paragraph"/>Note that in the first call to <code>check</code>, the classification 'parameter' is
+used. By default, the classification is hard-coded and configured as 'entity';
+it is possible to configure the default value through configuring the
+default <code>classification</code>. Additionaly, this configuration can be overridden by 
+parameter as shown here.<p class="paragraph"/><blockquote class="warning">
+For <code>BasicSanityChecker</code> and <code>StringCoerciveSanityChecker</code>, and any other
+extensions which are written appropriately, invoking a sanity check prior to
+calling <a href="../ref/Sanity Checkers/check.html" class="Sanity Checkers">check</a> for the first time will result in an
+<code>IllegalStateException</code>.<p class="paragraph"/>This does not need to be put in a <code>try / catch</code> clause, as this is to prevent
+developer folly.
+</blockquote><p class="paragraph"/><blockquote class="note">
+While the closure-style is recommended, more verbose calling structures are
+possible, but will not be discussed in this guide.
+</blockquote><p class="paragraph"/><h4>Allow Pass on <code>null</code></h4><p class="paragraph"/><blockquote class="warning">
+Sanity checkers outside the ones packaged in this plugin may not be written
+to implement this feature. If writing such a sanity checker, please indicate
+such.<p class="paragraph"/>All references to sanity checkers is only confidently referring to sanity
+checkers provided by the plugin.
+</blockquote><p class="paragraph"/><blockquote class="note">
+<a href="../ref/Sanity Checks/isNotNull.html" class="Sanity Checks">isNotNull</a> inherently does not follow the behavior outlined 
+in this section. It will  <em class="italic">always</em>  result in a failure if the entity being 
+checked is <code>null</code>.
+</blockquote><p class="paragraph"/>Generally speaking, <code>null</code> changes the behavior of sanity checks. All sanity
+checkers are designed to accommodate two methodologies:
+<ol>
+<li>Check if the entity is <code>null</code>, and if so report failure.</li>
+<li>Check if the entity is <code>null</code>, and if so allow it to pass.</li>
+</ol><p class="paragraph"/>The sanity checkers can be instructed to follow either of these methodologies
+by various means of granularity.<p class="paragraph"/>The highest level of granularity is the default. By default, sanity checkers
+are hard-coded and configured to disallow pass on <code>null</code>. This default
+configuration can be changed via <code>allowPassOnNull</code>.<p class="paragraph"/>The next level of granularity is in the <code>SanityChecker</code> constructor. This
+will set the default behavior for that sanity checker.<p class="paragraph"/>The next level of granularity is through use of either directly modifying
+<code>allowPassOnNull</code>, or invoking <code>allowPassOnNull()</code> / <code>disallowPassOnNull()</code>. 
+This will alter the behavior over the course of a sanity checker's life.<p class="paragraph"/>The final level of granularity is via the <strong class="bold">allowPassOnNull</strong> parameter at
+every sanity check. This is the finest granularity and only impacts the
+particular sanity check performed.<p class="paragraph"/>These levels of granularity provide extremely high flexibility for this
+behavior. Of course, it is best to develop with the mindset of using the
+highest level necessary, to avoid confusing the behavior.<p class="paragraph"/>An example use-case for using both methodologies in one sanity checker is to
+check optional parameters. In many cases, optional parameters are allowed to
+be <code>null</code>, and therefore it is undesirable to let that interfere with sanity
+checks if they are not present, but abide by sanity checks if they are.<p class="paragraph"/>Refer to the following example to see this implemention using Groovy Named
+Parameters. The method first checks the required parameters, assuming that the
+default behavior is set to disallow <code>null</code> to pass, and then allows <code>null</code> to
+pass when checking the optional parameters.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">public</span> void myMethod(Map options, <span class="java&#45;object">String</span> a, Date birthday, <span class="java&#45;object">int</span>&#8230; luckyNumbers) &#123;
+    BasicSanityChecker checker = <span class="java&#45;keyword">new</span> BasicSanityChecker().runChecks &#123;
+        check('a', a).isNotEmpty()<p class="paragraph"/>        check('birthday', myBirthday).isNotNull()<p class="paragraph"/>        luckyNumbers.eachWithIndex &#123; index, number &#45;&#62;
+            check(<span class="java&#45;quote">"luckyNumber&#91;$&#123;index&#125;&#93;"</span>, number).isNotNull()
+        &#125;<p class="paragraph"/>        allowPassOnNull()<p class="paragraph"/>        options.with &#123;
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()<p class="paragraph"/>            check('height', myHeight)
+            isDouble()<p class="paragraph"/>            check('myEyesAreBlue', myEyesAreBlue)
+            isBoolean()
+        &#125;
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (checker.hasFailures) &#123;
+        // Handle the result.
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="basic_sanity_checker">2.2 BasicSanityChecker</h2>
+The <strong class="bold">BasicSanityChecker</strong> is a very strict sanity checker. It is used when only
+strict datatyping needs to be enforced. It is arguably less useful if an
+application is strictly typed, however it is provided for completeness and
+for giving mnemonics to certain sanity checks that can otherwise be implemented
+manually.<p class="paragraph"/>However, due to the nature of some extensions, the simplistic nature of the
+<code>BasicSanityChecker</code> gives it some sanity checks that may not be feasible with
+other extensions.<p class="paragraph"/>Much like the root <code>SanityChecker</code> this checker is likely best used as a more
+fleshed-out basis for extension.<p class="paragraph"/>Sample:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">public</span> void myMethod(Map options, <span class="java&#45;object">String</span> a, Date birthday, <span class="java&#45;object">int</span>&#8230; luckyNumbers) &#123;
+    BasicSanityChecker checker = <span class="java&#45;keyword">new</span> BasicSanityChecker().runChecks &#123;
+        check('a', a).isNotEmpty()<p class="paragraph"/>        check('birthday', myBirthday).isNotNull()<p class="paragraph"/>        luckyNumbers.eachWithIndex &#123; index, number &#45;&#62;
+            check(<span class="java&#45;quote">"luckyNumber&#91;$&#123;index&#125;&#93;"</span>, number).isNotNull()
+        &#125;<p class="paragraph"/>        allowPassOnNull()<p class="paragraph"/>        options.with &#123;
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()<p class="paragraph"/>            check('height', myHeight)
+            isDouble()<p class="paragraph"/>            check('myEyesAreBlue', myEyesAreBlue)
+            isBoolean()
+        &#125;
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (checker.hasFailures) &#123;
+        // Handle the result.
+    &#125;
+&#125;</pre></div>
+
+
+
+<h2 id="string_coercive_sanity_checker">2.3 StringCoerciveSanityChecker</h2>
+The <strong class="bold">StringCoerciveSanityChecker</strong> is designed to perform sanity checks, with
+the added serendipity of coercing <code>String</code> entities where possible.<p class="paragraph"/>This sanity checker is intended for general use, especially where inputs are
+not strictly typed, and may be normalized as <code>String</code>. For instance, JSON in
+a JAXRS Resource, or with Groovy's Named Parameters.<p class="paragraph"/>The <strong class="bold">StringCoerciveSanityChecker</strong> handles the <code>entity</code> along with determining 
+pass / fail of the check:
+<ul class="star">
+<li>Run the sanity check.</li>
+<li>If the entity is a <code>String</code>, and the <code>String</code> is coercible to the type &#10;      the sanity check is looking for, return the entity coerced to that type.</li>
+<li>Otherwise, return the entity.</li>
+</ul><p class="paragraph"/>The following example demonstrates the usage:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> me.sudofu.sanitycheck.SanityChecker
+<span class="java&#45;keyword">import</span> me.sudofu.sanitycheck.BasicSanityChecker
+<span class="java&#45;keyword">import</span> me.sudofu.sanitycheck.StringCoerciveSanityChecker as SCSanityChecker<p class="paragraph"/><span class="java&#45;keyword">public</span> void myMethod(Map options, <span class="java&#45;object">String</span> a, Date birthday, <span class="java&#45;object">int</span>&#8230; luckyNumbers) &#123;
+    SanityChecker checker = <span class="java&#45;keyword">new</span> SCSanityChecker().runChecks &#123;
+        check('a', a).isNotEmpty()<p class="paragraph"/>        check('birthday', myBirthday).isNotNull()<p class="paragraph"/>        luckyNumbers.eachWithIndex &#123; index, number &#45;&#62;
+            luckyNumbers&#91;index&#93; = check(<span class="java&#45;quote">"luckyNumber&#91;$&#123;index&#125;&#93;"</span>, number).isNotNull()
+        &#125;<p class="paragraph"/>        allowPassOnNull()<p class="paragraph"/>        options.with &#123;
+            check('favoriteColor', myFavoriteColor)
+            isString()
+            isNotEmpty()<p class="paragraph"/>            myHeight = check('height', myHeight)
+        &#125;
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (checker.hasFailures) &#123;
+        // Handle the result.
+    &#125;<p class="paragraph"/>    checker = <span class="java&#45;keyword">new</span> BasicSanityChecker()
+        .check('myEyesAreBlue', options.myEyesAreBlue)
+        .isBoolean()<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (checker.hasFailures) &#123;
+        // Handle the result.
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Notice that not all sanity checks performed are strictly from 
+<code>StringCoerciveSanityChecker</code>. Also note that <a href="../ref/Sanity Checks/isBoolean.html" class="Sanity Checks">isBoolean</a> is
+not within <code>StringCoerciveSanityChecker</code>, so it has to be checked separately.
+The justification of this is because a <code>String</code> is not very intuitively
+coercible into <code>Boolean</code>, since both <code>"false"</code> and <code>"puppies"</code> would both
+resolve to false.<p class="paragraph"/><blockquote class="warning">
+The behavior of <code>StringCoerciveSanityChecker</code> is subject to Groovy's
+string-coersion algorithms. Therefore, a change in Groovy's string-coersion
+algorithms will change the behavior of this sanity checker.<p class="paragraph"/>For example, <code>"15D"</code> will successfully pass and be coerced from 
+<a href="../ref/Sanity Checks/isDouble.html" class="Sanity Checks">isDouble</a>, but <code>"15I"</code> will <strong class="bold">not</strong> pass nor be
+coerced from <a href="../ref/Sanity Checks/isInteger.html" class="Sanity Checks">isInteger</a>.
+</blockquote>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/extending.html"><strong>3</strong><span>Extending SanityChecker</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Sanity Checkers</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checkers/Extending%20Sanity%20Checker.html">Extending Sanity Checker</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checkers/check.html">check</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checkers/fields.html">fields</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checkers/runChecks.html">runChecks</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Sanity Checks</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/classMatch.html">classMatch</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/exactClassMatch.html">exactClassMatch</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isBigDecimal.html">isBigDecimal</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isBoolean.html">isBoolean</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isDouble.html">isDouble</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isInteger.html">isInteger</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isList.html">isList</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isLong.html">isLong</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isMap.html">isMap</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isNotEmpty.html">isNotEmpty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isNotNull.html">isNotNull</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isNumber.html">isNumber</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/isString.html">isString</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Sanity%20Checks/respondsTo.html">respondsTo</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
