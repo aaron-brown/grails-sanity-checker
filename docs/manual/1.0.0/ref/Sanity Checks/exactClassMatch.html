@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>Sanity Checker Plugin 1.0.0</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/usage.html"><strong>2</strong><span>Usage</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/extending.html"><strong>3</strong><span>Extending SanityChecker</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Utility for performing various Sanity Checks on arbitrary object data, providing a uniform set of responses for check failures.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="reference corner-all">
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                <h3>Purpose</h3><p class="paragraph"/>Check that the entity is  <em class="italic">exactly</em>  identified as a particular <code>Class</code>.<p class="paragraph"/><h3>Implicit Checks</h3>
+<ul class="star">
+<li><a href="../../ref/Sanity Checks/isNotNull.html" class="Sanity Checks">isNotNull</a></li>
+</ul><p class="paragraph"/><h3>Compatability Chart</h3><p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th>Sanity Checker</th><th>Compatible</th></tr><tr class="table-odd"><td><strong class="bold">SanityChecker</strong></td><td>Y</td></tr><tr class="table-even"><td><strong class="bold">BasicSanityChecker</strong></td><td>Y</td></tr><tr class="table-odd"><td><strong class="bold">StringCoerciveSanityChecker</strong></td><td>Y</td></tr></table><p class="paragraph"/><h3>Can Be Confused With</h3>
+<ul class="star">
+<li><a href="../../ref/Sanity Checks/classMatch.html" class="Sanity Checks">classMatch</a></li>
+</ul><p class="paragraph"/>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block">
+                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Sanity Checkers</h1>
+                        <div class="menu-sub">
+                            
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checkers/Extending%20Sanity%20Checker.html">Extending Sanity Checker</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checkers/check.html">check</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checkers/fields.html">fields</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checkers/runChecks.html">runChecks</a>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="menu-block">
+                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Sanity Checks</h1>
+                        <div class="menu-sub selected">
+                            
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/classMatch.html">classMatch</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/exactClassMatch.html">exactClassMatch</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isBigDecimal.html">isBigDecimal</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isBoolean.html">isBoolean</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isDouble.html">isDouble</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isInteger.html">isInteger</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isList.html">isList</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isLong.html">isLong</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isMap.html">isMap</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isNotEmpty.html">isNotEmpty</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isNotNull.html">isNotNull</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isNumber.html">isNumber</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/isString.html">isString</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Sanity%20Checks/respondsTo.html">respondsTo</a>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+
+<script type="text/javascript" src="../../js/docs.js"></script>
+
+</body>
+</html>
